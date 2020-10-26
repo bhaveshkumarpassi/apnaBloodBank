@@ -13,6 +13,9 @@ import HospitalStore from './HospitalStore';
 import Notifications from './NotificationsComponent';
 import Loading from './LoadingComponent';
 import { color } from 'react-native-reanimated';
+import MeetDeveloper from './MeetDeveloper';
+import DonorList from './DonorListComponent';
+import UserDetail from './UserDetailComponent';
 
 
 
@@ -23,6 +26,7 @@ const HospitalStoreNavigator = createStackNavigator();
 const NotificationsNavigator = createStackNavigator();
 const MainNavigator = createDrawerNavigator();
 const LoginNavigator = createStackNavigator();
+const MeetDeveloperNavigator = createStackNavigator();
 
 function ProfileNavigatorScreen() {
     return(
@@ -121,6 +125,22 @@ function NeedDonorNavigatorScreen() {
                     )
                 
                 })}
+            />
+            <NeedDonorNavigator.Screen
+                name="Available Donors"
+                component={DonorList}
+                options= {{ headerTitle: "Available Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="User Details"
+                component={UserDetail}
+                options= {{ headerTitle: "User Details", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
             />
         </NeedDonorNavigator.Navigator>
     );
@@ -228,6 +248,39 @@ function HomeNavigatorScreen() {
     );
 }
 
+function MeetDeveloperNavigatorScreen() {
+    return(
+        <MeetDeveloperNavigator.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: "#fa4659"
+                },
+                headerTintColor: "#fff",
+                headerTitleStyle: {
+                    color: "#fff"            
+                }
+            }}
+        >
+            <LoginNavigator.Screen
+                name="Meet Developer"
+                component={MeetDeveloper}
+                options={{headerTitle: "Meet Developer"},({navigation}) => ({
+                    headerLeft: () => (
+                        <Icon 
+                            name='menu' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginLeft: 10}}
+                            onPress={() => 
+                                navigation.toggleDrawer()}
+                        />
+                    )
+                
+                })}
+            />
+        </MeetDeveloperNavigator.Navigator>
+    );
+}
 
 const CustomDrawerContentComponent = (props) => (
     <ScrollView>
@@ -331,6 +384,18 @@ function MainNavigatorScreen() {
                       color={tintColor}
                     />
                 )}}
+            />
+            <MainNavigator.Screen
+                name="Meet Developer"
+                component={MeetDeveloperNavigatorScreen}
+                options={{ headerTitle: "Meet Developer"},{drawerIcon: ({ tintColor }) => (
+                    <Icon
+                      name='handshake'
+                      type='font-awesome-5'            
+                      size={24}
+                      color={tintColor}
+                    />
+                  )}}
             />
         </MainNavigator.Navigator>
     );

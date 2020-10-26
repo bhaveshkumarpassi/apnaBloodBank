@@ -2,16 +2,16 @@ import React, {Component} from 'react';
 import { View, Image, ImageBackground, Text, StyleSheet} from 'react-native';
 
 
-class Profile extends Component {
+class UserDetail extends Component {
 
     render() {
         return (
             <View>
-                <Text>This is Profile component.</Text>
+                <Text>This is UserDetail component.</Text>
                 
             </View>
         );
     }
 }
 
-export default Profile;
+export default UserDetail;
