@@ -4,22 +4,100 @@ import { Avatar, Accessory , ButtonGroup, Icon} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import Login from './LoginComponent';
 import Profile from './ProfileComponent';
+import { auth, firestore, fireauth, firebasestore } from '../firebase/firebase';
+import { connect } from 'react-redux';
+import { logoutUser } from '../redux/ActionCreators';
+import {fetchUsers} from '../redux/ActionCreators';
+import UserDetailComponent from './UserDetailComponent';
 
-function Home({ navigation: { navigate } }) {
+const mapStateToProps = (state) => {
+    
+  return {
+      users: state.users,
+      auth: state.auth
+  };
+}
 
-    const buttons = ['Login', 'Edit Profile', 'Logout'];
+const mapDispatchToProps = (dispatch) => {
+    
+  return {
+      fetchUsers: () => dispatch(fetchUsers()),
+      logoutUser: (navigation) => dispatch(logoutUser(navigation))
+  };
+}
+
+class Home extends Component {
+
+    _isMounted = false;
+    constructor(props) {
+       super(props);
+
+       this.state = {
+         imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119',
+         fullname: 'User'
+       }
+    }
+
+  componentDidMount() {
+
+    this._isMounted = true;
+    this.unsubscribe =  auth.onAuthStateChanged(user => {
+      
+      if(this._isMounted) {
+        if(user) {
+ 
+          if(user.photoURL)
+          {
+            this.setState({
+            fullname: user.displayName,
+            imageUrl: user.photoURL
+          })
+        }
+        else {
+          this.setState({
+            fullname: user.displayName,
+            imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119'
+          })
+        }
+        }
+        else {
+          this.setState({
+            fullname: 'User',
+            imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119'
+          })
+        }
+      }
+    })
+}
+
+componentWillUnmount() {
+
+    this._isMounted = false;
+    this.unsubscribe();
+}
+
+
+
+  handleLogout() {
+
+        this.props.logoutUser(this.props.navigation);
+  }
+
+
+  render(){
+
     return (
         <View style={styles.container}>
             <View style={styles.avatar}>
             <Avatar rounded
                 size="xlarge"
-                source={require('./images/avatar1.png')}
+                source={{uri: this.state.imageUrl}}
                 icon={{name: 'user', type: 'font-awesome'}}
                 />
-            <Text style={styles.text}>Hello! user</Text>
             </View>
+            <Text style={styles.text}>Hello! {this.state.fullname}</Text>
             <ImageBackground source={require('./images/homeBlood2.jpg')} style={styles.image}>
-              <Text style={styles.text}>Welcom !! to apnaBloodBank app.</Text>
+              <Text style={styles.text}>Welcome !! to apnaBloodBank app.</Text>
             </ImageBackground>
             <View style={{flex:1 , flexDirection: 'row',alignItems: 'center',justifyContent: 'center'}}>
               <Icon
@@ -28,7 +106,7 @@ function Home({ navigation: { navigate } }) {
                         name={'sign-in'}
                         type='font-awesome'
                         color='#f50'
-                        onPress={() => navigate('Login')}
+                        onPress={() => this.props.navigation.navigate('Login')}
                     />
                     <Icon
                         raised
@@ -36,7 +114,7 @@ function Home({ navigation: { navigate } }) {
                         name={'pencil'}
                         type='font-awesome'
                         color='#512DA8'
-                        onPress={() => navigate('My Profile')}
+                        onPress={() => this.props.navigation.navigate('My Profile')}
                     />
                     <Icon
                             raised
@@ -44,11 +122,12 @@ function Home({ navigation: { navigate } }) {
                             name='sign-out'
                             type='font-awesome'
                             color='green'
-                            //onPress={() => shareDish(dish.name, dish.description, baseUrl + dish.image)}
+                            onPress={() => this.handleLogout()}
                     />
             </View>
         </View>
     );
+}
 }
 
 const styles = StyleSheet.create({
@@ -57,11 +136,10 @@ const styles = StyleSheet.create({
       alignItems: "center",
       backgroundColor  : "#f0fff3",
       justifyContent: 'center',
-      paddingTop: 30,
+      paddingTop: 20
     },
     avatar: {
-      flex: 2,
-      paddingBottom: 20
+      flex: 2
     },
     image: {
       flex: 3,
@@ -74,11 +152,9 @@ const styles = StyleSheet.create({
       fontSize: 30,
       fontWeight: "bold",
       textAlign: 'center',
-    },
-    buttonGroup: {
-      flex: 3
+      paddingBottom: 30
     }
   });
 
-export default Home;
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
 

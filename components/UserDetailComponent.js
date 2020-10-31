@@ -1,6 +1,14 @@
 import React, {Component} from 'react';
 import { View, Image, ImageBackground, Text, StyleSheet} from 'react-native';
+import {connect} from 'react-redux';
 
+
+const mapStateToProps = (state) => {
+
+    return{
+      users: state.users
+    }
+};
 
 class UserDetail extends Component {
 
@@ -14,4 +22,4 @@ class UserDetail extends Component {
     }
 }
 
-export default UserDetail;
+export default connect(mapStateToProps)(UserDetail);

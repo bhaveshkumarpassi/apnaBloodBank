@@ -3,6 +3,7 @@ import {BLOOD} from '../shared/blood';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator, DrawerItemList } from '@react-navigation/drawer';
+import NetInfo from '@react-native-community/netinfo';
 import { View, Platform, ScrollView, Image, StyleSheet, SafeAreaView, Text, ToastAndroid } from 'react-native';
 import {Icon} from 'react-native-elements';
 import Home from './HomeComponent';
@@ -14,10 +15,33 @@ import Notifications from './NotificationsComponent';
 import Loading from './LoadingComponent';
 import { color } from 'react-native-reanimated';
 import MeetDeveloper from './MeetDeveloper';
-import DonorList from './DonorListComponent';
+import APlusDonorList from './APlusDonorListComponent';
+import AMinusDonorList from './AMinusDonorListComponent';
+import BPlusDonorList from './BPlusDonorListComponent';
+import BMinusDonorList from './BMinusDonorListComponent';
+import OPlusDonorList from './OPlusDonorListComponent';
+import OMinusDonorList from './OMinusDonorListComponent';
+import ABPlusDonorList from './ABPlusDonorListComponent';
+import ABMinusDonorList from './ABMinusDonorListComponent';
 import UserDetail from './UserDetailComponent';
+import {connect} from 'react-redux';
+import {fetchUsers} from '../redux/ActionCreators';
+import { auth } from '../firebase/firebase';
+import { Root, Toast } from 'native-base';
 
+const mapStateToProps = (state) => {
+    
+    return {
+        users: state.users
+    };
+}
 
+const mapDispatchToProps = dispatch => {
+    
+    return {
+        fetchUsers: () => dispatch(fetchUsers())
+    };
+}
 
 const ProfileNavigator = createStackNavigator();
 const HomeNavigator = createStackNavigator();
@@ -29,6 +53,7 @@ const LoginNavigator = createStackNavigator();
 const MeetDeveloperNavigator = createStackNavigator();
 
 function ProfileNavigatorScreen() {
+
     return(
         <ProfileNavigator.Navigator
             screenOptions={{
@@ -127,9 +152,65 @@ function NeedDonorNavigatorScreen() {
                 })}
             />
             <NeedDonorNavigator.Screen
-                name="Available Donors"
-                component={DonorList}
-                options= {{ headerTitle: "Available Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                name="A+ Donors"
+                component={APlusDonorList}
+                options= {{ headerTitle: "A+ Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="A- Donors"
+                component={AMinusDonorList}
+                options= {{ headerTitle: "A- Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="B+ Donors"
+                component={BPlusDonorList}
+                options= {{ headerTitle: "B+ Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="B- Donors"
+                component={BMinusDonorList}
+                options= {{ headerTitle: "B- Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="O+ Donors"
+                component={OPlusDonorList}
+                options= {{ headerTitle: "O+ Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="O- Donors"
+                component={OMinusDonorList}
+                options= {{ headerTitle: "O- Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="AB+ Donors"
+                component={ABPlusDonorList}
+                options= {{ headerTitle: "AB+ Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <NeedDonorNavigator.Screen
+                name="AB- Donors"
+                component={ABMinusDonorList}
+                options= {{ headerTitle: "AB- Donors", headerStyle: {backgroundColor: '#85cfcb'}, 
                     headerTintColor: '#200019', 
                     headerTitleStyle: {color: '#200019'}
                 }}
@@ -146,7 +227,7 @@ function NeedDonorNavigatorScreen() {
     );
 }
 
-function HospitalStoreNavigatorScreen() {
+function HospitalStoreNavigatorScreen(){
     return(
         <HospitalStoreNavigator.Navigator
             screenOptions={{
@@ -214,7 +295,8 @@ function NotificationsNavigatorScreen() {
     );
 }
 
-function HomeNavigatorScreen() {
+function HomeNavigatorScreen(){
+
     return(
         <HomeNavigator.Navigator
             screenOptions={{
@@ -247,6 +329,8 @@ function HomeNavigatorScreen() {
         </HomeNavigator.Navigator>
     );
 }
+
+connect()(HomeNavigatorScreen);
 
 function MeetDeveloperNavigatorScreen() {
     return(
@@ -301,6 +385,7 @@ const CustomDrawerContentComponent = (props) => (
   );
 
 function MainNavigatorScreen() {
+
     return(
         <MainNavigator.Navigator
             initialRouteName="Home"
@@ -403,11 +488,53 @@ function MainNavigatorScreen() {
 
 class Main extends Component {
 
+
+  componentDidMount() {
+      this.props.fetchUsers();
+    
+    window.value = NetInfo.addEventListener(connectionInfo => this.handleConnectivityChange(connectionInfo))
+  }
+
+  componentWillUnmount() {
+        window.value();
+  }
+
+  handleConnectivityChange = (connectionInfo) => {
+    switch (connectionInfo.type) {
+        case 'none': 
+            Toast.show ({text: 'You are now offline', duration: 4000,textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        case 'wifi':
+            Toast.show ({ text: 'You are now on WiFi', duration: 4000,textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        case 'cellular':
+            Toast.show ({ text: 'You are now on Cellular', duration: 4000, textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        case 'unknown' :
+            Toast.show ({ text: 'The network state could not or has yet to be be determined', duration: 4000, textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        case 'bluetooth' :
+            Toast.show ({ text: 'You are now on Bluetooth', duration: 4000, textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        case 'other' :
+            Toast.show ({ text: 'Active network over another type of network', duration: 4000, textStyle: {textAlign: 'center'},
+            buttonStyle: {marginBottom: 40}});
+            break;
+        default: 
+    }
+}
   render() {
  
     return (
         <NavigationContainer>
-            <MainNavigatorScreen />           
+            <Root>
+            <MainNavigatorScreen/>  
+            </Root>       
         </NavigationContainer>
     );
   }
@@ -436,4 +563,4 @@ const styles = StyleSheet.create({
     }
   });
   
-export default Main;
+  export default connect(mapStateToProps, mapDispatchToProps)(Main);

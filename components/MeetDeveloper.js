@@ -3,7 +3,6 @@ import { View, Image, ImageBackground, Text, StyleSheet, Linking} from 'react-na
 import { Card, Icon, SocialIcon } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 
-
 class MeetDeveloper extends Component {
 
     render() {

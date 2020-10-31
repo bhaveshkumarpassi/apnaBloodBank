@@ -1,19 +1,28 @@
 import React, {Component} from 'react';
 import { View, Image, ImageBackground, Text, StyleSheet, FlatList, ScrollView, SafeAreaView} from 'react-native';
-import {USERS} from '../shared/users';
 import {ListItem, Card, Avatar, Button} from 'react-native-elements';
+import {connect} from 'react-redux';
+import {Loading} from './LoadingComponent';
 
 
-class DonorList extends Component {
+const mapStateToProps = (state) => {
+
+    return{
+      users: state.users
+    }
+};
+
+class ABPlusDonorList extends Component {
 
     constructor(props) {
         super(props);
-
-        this.state = {
-            donors: USERS
-        }
+        
     }
     render() {
+
+        const availability = ({willing}) => {
+            return ((!willing) ? 'Available': 'Un-Available');
+        }
 
         const renderListItem = ({ item , index}) => (
                 <ListItem
@@ -24,24 +33,39 @@ class DonorList extends Component {
                     pad = {30}
                     onPress= {() => this.props.navigation.navigate('User Details')}
                 >   
-                    <Avatar rounded size={'medium'} source={require('./images/avatar2.png')} />
+                    <Avatar rounded size={'medium'} source={{uri: item.imageUrl}} icon={{name: 'user', type: 'font-awesome'}}/>
                     <ListItem.Content>
                         <ListItem.Title style={{fontWeight: 'bold', color: 'white'}}>{item.firstname + ' ' + item.lastname}</ListItem.Title>
+                        <ListItem.Subtitle style={{color: 'white'}}>{availability(item.willing)}</ListItem.Subtitle>
                     </ListItem.Content>
                     <ListItem.Chevron/>
                 </ListItem>
             );
         
+        if(this.props.users.isLoading) {
+
+            return(
+                <Loading />
+            );
+        }
+        else if(this.props.users.errMess) {
+
+            return(
+                <View>            
+                    <Text>{props.dishes.errMess}</Text>
+                </View>            
+            );
+        }
         return (
             <SafeAreaView>
                     <FlatList
-                        data={this.state.donors}
+                        data={this.props.users.users.filter((user) => user.bloodgroup === 'AB+')}
                         renderItem={renderListItem}
-                        keyExtractor={item => item.id.toString()}
+                        keyExtractor={item => item._id.toString()}
                         />
             </SafeAreaView>
         );
     }
 }
 
-export default DonorList;
+export default connect(mapStateToProps)(ABPlusDonorList);
