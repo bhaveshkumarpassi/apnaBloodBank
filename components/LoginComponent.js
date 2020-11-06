@@ -13,6 +13,7 @@ import ValidationComponent from 'react-native-form-validator';
 import {connect} from 'react-redux';
 import {addUser, fetchUsers, loginUser, logoutUser} from '../redux/ActionCreators';
 import { auth } from '../firebase/firebase';
+import {normalize} from '../assets/fonts/DynamicFontSize';
 //import { baseUrl } from '../shared/baseUrl';
 
 
@@ -95,7 +96,7 @@ class LoginTab extends Component {
                 </Card>
                 <View style={styles.formButton}>
                     <TouchableOpacity style={{alignItems: "center",padding: 10}} onPress={() => this.props.navigation.navigate('Register')}>
-                        <Text style={{padding: 20, fontWeight: 'bold'}}>Don't have an account ? Go and register!</Text>
+                        <Text style={{padding: 20, fontWeight: 'bold', fontSize: normalize(16)}}>Don't have an account ? Go and register!</Text>
                     </TouchableOpacity>
                     <Button
                         onPress={() => this.handleLogin(this.state.email, this.state.password)}
@@ -114,6 +115,7 @@ class LoginTab extends Component {
                         }}
                         titleStyle={{padding: 20}}
                         containerStyle={{margin: 20}}
+                        raised
                         />
                     <Button
                         onPress={() => this.handleLogout()}
@@ -132,6 +134,7 @@ class LoginTab extends Component {
                         }}
                         titleStyle={{padding: 20}}
                         containerStyle={{marginLeft: 20, marginRight: 20}}
+                        raised
                         />
                     </View>
                 </View>
@@ -337,6 +340,7 @@ class RegisterTab extends ValidationComponent {
                         onPress={this.getImageFromCamera}
                         buttonStyle={{margin: 10, backgroundColor: '#f0fff3', borderRadius: 28}}
                         titleStyle={{color: "black", fontWeight: "bold"}}
+                        
                         />
                     <Button
                         title="From Gallery"
@@ -354,7 +358,7 @@ class RegisterTab extends ValidationComponent {
                     inputContainerStyle={styles.formInput}
                     />
                 <Input
-                    placeholder="Password"
+                    placeholder="Set a Password"
                     leftIcon={{ type: 'font-awesome', name: 'key' }}
                     onChangeText={(password) => this.setState({password})}
                     value={this.state.password}
@@ -443,8 +447,8 @@ class RegisterTab extends ValidationComponent {
                     inputContainerStyle={styles.formInput}
                     
                 />
-                <Tooltip height={325} popover={<Text style={{color: 'white'}}>Check in the Switch Given if you want to be contacted when there is need of blood group of yours{'\n'}We recommend to uncheck it if you have recently donated blood for your good health and this status can always be updated later when you feel you need to be contacted in My Profile section.</Text>}>
-                <Text style={{marginLeft: 12, fontWeight: 'bold', marginRight: 12,backgroundColor: 'white', borderRadius: 20, marginBottom: 20}}>{'  '}Press here to get Details of below Switch!</Text>
+                <Tooltip height={300} popover={<Text style={{color: 'white', fontSize: normalize(12)}}>Turn on the Switch Given if you want to be contacted when there is need of blood group of yours{'\n'}We recommend to turn it off if you have recently donated blood for your good health and this status can always be updated later when you feel you need to be contacted in My Profile section.</Text>}>
+                <Text style={{marginLeft: 12, fontWeight: 'bold', marginRight: 12,marginBottom: 20, height: 40, textAlignVertical: 'center', fontSize: normalize(15)}}>Press here to get Details of below Switch!</Text>
                 </Tooltip>
                 <Switch
                     value={this.state.willing}
@@ -469,6 +473,7 @@ class RegisterTab extends ValidationComponent {
                             backgroundColor: "#fa4659",
                             borderRadius: 30
                         }}
+                        raised
                         />
             </View>
             </View>

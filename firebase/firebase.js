@@ -8,6 +8,8 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
  }
 
+export const firebaseSupport = firebase; 
+
 export const auth = firebase.auth();
 
 export const fireauth = firebase.auth;

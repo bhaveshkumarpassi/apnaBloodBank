@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { View, Image, ImageBackground, Text, StyleSheet} from 'react-native';
-import { Avatar, Accessory , ButtonGroup, Icon} from 'react-native-elements';
+import { View,ImageBackground, Text, StyleSheet, Dimensions, ActivityIndicator} from 'react-native';
+import { Avatar, Accessory , ButtonGroup, Icon, Image, Card, Button} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import Login from './LoginComponent';
 import Profile from './ProfileComponent';
@@ -9,6 +9,9 @@ import { connect } from 'react-redux';
 import { logoutUser } from '../redux/ActionCreators';
 import {fetchUsers} from '../redux/ActionCreators';
 import UserDetailComponent from './UserDetailComponent';
+import {normalize} from '../assets/fonts/DynamicFontSize';
+import {widthToDp, heightToDp} from '../responsive';
+import { Loading } from './LoadingComponent';
 
 const mapStateToProps = (state) => {
     
@@ -28,22 +31,20 @@ const mapDispatchToProps = (dispatch) => {
 
 class Home extends Component {
 
-    _isMounted = false;
     constructor(props) {
        super(props);
 
        this.state = {
          imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119',
-         fullname: 'User'
+         fullname: 'User',
+         isFontLoaded: false
        }
     }
 
-  componentDidMount() {
+  async componentDidMount() {
 
-    this._isMounted = true;
     this.unsubscribe =  auth.onAuthStateChanged(user => {
       
-      if(this._isMounted) {
         if(user) {
  
           if(user.photoURL)
@@ -51,14 +52,14 @@ class Home extends Component {
             this.setState({
             fullname: user.displayName,
             imageUrl: user.photoURL
-          })
-        }
-        else {
-          this.setState({
-            fullname: user.displayName,
-            imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119'
-          })
-        }
+            })
+          }
+          else {
+            this.setState({
+              fullname: user.displayName,
+              imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119'
+            })
+          }
         }
         else {
           this.setState({
@@ -66,13 +67,11 @@ class Home extends Component {
             imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119'
           })
         }
-      }
     })
+
 }
 
 componentWillUnmount() {
-
-    this._isMounted = false;
     this.unsubscribe();
 }
 
@@ -87,19 +86,58 @@ componentWillUnmount() {
   render(){
 
     return (
+      <ScrollView>
         <View style={styles.container}>
             <View style={styles.avatar}>
+            
             <Avatar rounded
                 size="xlarge"
                 source={{uri: this.state.imageUrl}}
                 icon={{name: 'user', type: 'font-awesome'}}
                 />
-            </View>
             <Text style={styles.text}>Hello! {this.state.fullname}</Text>
-            <ImageBackground source={require('./images/homeBlood2.jpg')} style={styles.image}>
-              <Text style={styles.text}>Welcome !! to apnaBloodBank app.</Text>
-            </ImageBackground>
-            <View style={{flex:1 , flexDirection: 'row',alignItems: 'center',justifyContent: 'center'}}>
+            <Text style={styles.text}>Welcome !! to apnaBloodBank app.</Text>
+            <View style={{padding: 20}}>
+            <Button
+                        //onPress={() => this.handleLogin(this.state.email, this.state.password)}
+                        title="View Guide"
+                        icon={
+                            <Icon
+                                name='book-open'
+                                type='font-awesome-5'            
+                                size={24}
+                                color= 'white'
+                            />
+                        }
+                        buttonStyle={{
+                            backgroundColor: "#fa4659",
+                            borderRadius: 30
+                        }}
+                        titleStyle={{padding: 10}}
+                        containerStyle={{margin: 20}}
+                        raised
+                        />
+                    <Button
+                        //onPress={() => this.handleLogout()}
+                        title="View Stars"
+                        icon={
+                            <Icon
+                                name='star'
+                                type='font-awesome'            
+                                size={24}
+                                color= 'white'
+                            />
+                        }
+                        buttonStyle={{
+                            backgroundColor: "#fa4659",
+                            borderRadius: 30
+                        }}
+                        titleStyle={{padding: 20}}
+                        containerStyle={{marginLeft: 20, marginRight: 20}}
+                        raised
+                        />
+            </View>
+            <View style={{flex:1 , flexDirection: 'row', marginVertical: '10%'}}>
               <Icon
                         raised
                         reverse
@@ -111,7 +149,7 @@ componentWillUnmount() {
                     <Icon
                         raised
                         reverse
-                        name={'pencil'}
+                        name={'user'}
                         type='font-awesome'
                         color='#512DA8'
                         onPress={() => this.props.navigation.navigate('My Profile')}
@@ -125,34 +163,36 @@ componentWillUnmount() {
                             onPress={() => this.handleLogout()}
                     />
             </View>
-        </View>
+            <View style={{paddingVertical: '5%'}}>
+            <Image
+              source={require('./images/homeBlood.jpg')}
+              style={{height: 250, width: 250, borderRadius: 25}}
+              PlaceholderContent={<ActivityIndicator />}
+            />
+            </View>
+            
+            
+            </View>
+          </View>
+      </ScrollView>
     );
 }
 }
-
+var screenHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
     container: {
-      flex:1,
-      alignItems: "center",
-      backgroundColor  : "#f0fff3",
-      justifyContent: 'center',
-      paddingTop: 20
+      flex:1
     },
     avatar: {
-      flex: 2
+      alignItems: 'center',
+      backgroundColor  : "#f0fff3",
+      paddingVertical: 10
     },
-    image: {
-      flex: 3,
-      //resizeMode: "cover",
-      height: 390,
-      opacity: 0.6
-    },
+    
     text: {
       color: "#440047",
-      fontSize: 30,
-      fontWeight: "bold",
+      fontSize: normalize(25),
       textAlign: 'center',
-      paddingBottom: 30
     }
   });
 

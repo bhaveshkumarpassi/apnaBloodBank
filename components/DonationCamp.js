@@ -3,8 +3,9 @@ import { View, Image, ImageBackground, Text, StyleSheet} from 'react-native';
 import { auth, firestore, fireauth, firebasestore } from '../firebase/firebase';
 import {Icon, Button} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
+import {normalize} from '../assets/fonts/DynamicFontSize';
 
-class HospitalStore extends Component {
+class DonationCamp extends Component {
 
     constructor(props) {
 
@@ -49,12 +50,12 @@ class HospitalStore extends Component {
             <ScrollView style={{backgroundColor: '#f0fff3'}}>
                 <View style={{flex: 1, flexDirection: 'column'}}>
                 <Text style={{color: "#440047",
-                    fontSize: 25,
+                    fontSize: normalize(25),
                     fontWeight: "bold",
                     textAlign: 'center',
                     marginTop: 40,
                     flex: 1
-                    }}>Sorry !! You need to Login first.</Text>
+                    }}>Sorry !! You need to Login first...</Text>
                 <ImageBackground source={require('./images/bloodLogo.png')} style={{height: 600, marginTop: 60, width: 550, flex: 3}}>
                 <Button
                     onPress={() => this.props.navigation.navigate('Login')}
@@ -74,10 +75,11 @@ class HospitalStore extends Component {
                     }}
                     titleStyle={{padding: 20}}
                     containerStyle={{marginRight: 250, marginLeft: 70, marginTop: 40}}
+                    raised
                     />
                 <Button
                     onPress={() => this.props.navigation.navigate('Home')}
-                    title="Go Back To Home"
+                    title="Home"
                     icon={
                         <Icon
                             name='arrow-circle-left'
@@ -93,6 +95,7 @@ class HospitalStore extends Component {
                     }}
                     titleStyle={{padding: 20}}
                     containerStyle={{marginRight: 250, marginLeft: 70, marginTop: 40}}
+                    raised
                     />
                 </ImageBackground>
                 
@@ -103,4 +106,4 @@ class HospitalStore extends Component {
     }
 }
 
-export default HospitalStore;
+export default DonationCamp;

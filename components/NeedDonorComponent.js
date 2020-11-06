@@ -5,6 +5,7 @@ import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-ta
 import { auth, firestore, fireauth, firebasestore } from '../firebase/firebase';
 import {connect} from 'react-redux';
 import {Icon, Button, Card} from 'react-native-elements';
+import {normalize} from '../assets/fonts/DynamicFontSize';
 
 
 const mapStateToProps = (state) => {
@@ -65,7 +66,7 @@ class NeedDonor extends Component {
         const state = this.state;
         return (
             <ScrollView style={{backgroundColor: '#f0fff3'}}>
-                <Text style={{fontWeight: 'bold', fontSize: 20, alignSelf: 'center', marginTop: 15, marginBottom: 15}}>Select the needed Blood Group !!</Text>
+                <Text style={{fontWeight: 'bold', fontSize: normalize(20), alignSelf: 'center', marginTop: 15, marginBottom: 15}}>Select the needed Blood Group !!</Text>
                 <View style={{flex: 1, flexDirection: 'column'}}>
                 <Card>
                 <View style={styles.container}>
@@ -152,12 +153,12 @@ class NeedDonor extends Component {
                 <ScrollView style={{backgroundColor: '#f0fff3'}}>
                     <View style={{flex: 1, flexDirection: 'column'}}>
                     <Text style={{color: "#440047",
-                        fontSize: 25,
+                        fontSize: normalize(25),
                         fontWeight: "bold",
                         textAlign: 'center',
                         marginTop: 40,
-                        flex: 1
-                        }}>Sorry !! You need to Login first.</Text>
+                        flex: 1,
+                        }}>Sorry !! You need to Login first...</Text>
                     <ImageBackground source={require('./images/bloodLogo.png')} style={{height: 600, marginTop: 60, width: 550, flex: 3}}>
                     <Button
                         onPress={() => this.props.navigation.navigate('Login')}
@@ -177,10 +178,11 @@ class NeedDonor extends Component {
                         }}
                         titleStyle={{padding: 20}}
                         containerStyle={{marginRight: 250, marginLeft: 70, marginTop: 40}}
+                        raised
                         />
                     <Button
                         onPress={() => this.props.navigation.navigate('Home')}
-                        title="Go Back To Home"
+                        title="Home"
                         icon={
                             <Icon
                                 name='arrow-circle-left'
@@ -196,6 +198,7 @@ class NeedDonor extends Component {
                         }}
                         titleStyle={{padding: 20}}
                         containerStyle={{marginRight: 250, marginLeft: 70, marginTop: 40}}
+                        raised
                         />
                     </ImageBackground>
                     
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
     wrapper: { flexDirection: 'row' },
     title: { flex: 1, backgroundColor: '#f6f8fa' },
     row: {  height: 28  },
-    text: { textAlign: 'center' }
+    text: { textAlign: 'center', fontSize: normalize(14) }
 });
 
 export default connect(mapStateToProps)(NeedDonor);

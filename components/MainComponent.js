@@ -10,7 +10,7 @@ import Home from './HomeComponent';
 import Login from './LoginComponent';
 import Profile from './ProfileComponent';
 import NeedDonor from './NeedDonorComponent';
-import HospitalStore from './HospitalStore';
+import DonationCamp from './DonationCamp';
 import Notifications from './NotificationsComponent';
 import Loading from './LoadingComponent';
 import { color } from 'react-native-reanimated';
@@ -28,6 +28,8 @@ import {connect} from 'react-redux';
 import {fetchUsers} from '../redux/ActionCreators';
 import { auth } from '../firebase/firebase';
 import { Root, Toast } from 'native-base';
+import {normalize} from '../assets/fonts/DynamicFontSize';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
 
 const mapStateToProps = (state) => {
     
@@ -46,7 +48,7 @@ const mapDispatchToProps = dispatch => {
 const ProfileNavigator = createStackNavigator();
 const HomeNavigator = createStackNavigator();
 const NeedDonorNavigator = createStackNavigator();
-const HospitalStoreNavigator = createStackNavigator();
+const DonationCampNavigator = createStackNavigator();
 const NotificationsNavigator = createStackNavigator();
 const MainNavigator = createDrawerNavigator();
 const LoginNavigator = createStackNavigator();
@@ -227,9 +229,9 @@ function NeedDonorNavigatorScreen() {
     );
 }
 
-function HospitalStoreNavigatorScreen(){
+function DonationCampNavigatorScreen(){
     return(
-        <HospitalStoreNavigator.Navigator
+        <DonationCampNavigator.Navigator
             screenOptions={{
                 headerStyle: {
                     backgroundColor: "#fa4659"
@@ -240,10 +242,10 @@ function HospitalStoreNavigatorScreen(){
                 }
             }}
         >
-            <HospitalStoreNavigator.Screen
-                name="Hospital Store"
-                component={HospitalStore}
-                options={{headerTitle: "Hospital Store"},({navigation}) => ({
+            <DonationCampNavigator.Screen
+                name="Blood Donation Camp"
+                component={DonationCamp}
+                options={{headerTitle: "Blood Donation Camp"},({navigation}) => ({
                     headerLeft: () => (
                         <Icon 
                             name='menu' 
@@ -257,7 +259,7 @@ function HospitalStoreNavigatorScreen(){
                 
                 })}
             />
-        </HospitalStoreNavigator.Navigator>
+        </DonationCampNavigator.Navigator>
     );
 }
 
@@ -330,7 +332,7 @@ function HomeNavigatorScreen(){
     );
 }
 
-connect()(HomeNavigatorScreen);
+//connect()(HomeNavigatorScreen);
 
 function MeetDeveloperNavigatorScreen() {
     return(
@@ -377,7 +379,7 @@ const CustomDrawerContentComponent = (props) => (
             <Text style={styles.drawerHeaderText}>apnaBloodBank</Text>
           </View>
         </View>
-        <View style={{marginTop: 60, padding: 20}}>
+        <View style={{marginTop: normalize(20), padding: 20, marginBottom: normalize(20)}}>
         <DrawerItemList {...props} />
         </View>
       </SafeAreaView>
@@ -390,12 +392,14 @@ function MainNavigatorScreen() {
         <MainNavigator.Navigator
             initialRouteName="Home"
             drawerStyle={{
-                backgroundColor  : "#f0fff3" }}
+                backgroundColor  : "#f0fff3" , width: normalize(380)}}
+            drawerType='slide'
             drawerContent={(props) => <CustomDrawerContentComponent {...props} />}
             drawerContentOptions={{
                 activeTintColor: '#070d59',
                 activeBackgroundColor: '#c6f1e7',
-                inactiveTintColor: 'black'
+                inactiveTintColor: 'black',
+                
             }}
         >   
             <MainNavigator.Screen
@@ -447,9 +451,9 @@ function MainNavigatorScreen() {
                   )}}
             />
             <MainNavigator.Screen
-                name="Hospital Store"
-                component={HospitalStoreNavigatorScreen}
-                options={{headerTitle: "Hospital STore"},{drawerIcon: ({ tintColor }) => (
+                name="Blood Donation Camp"
+                component={DonationCampNavigatorScreen}
+                options={{headerTitle: "Blood Donation Camp"},{drawerIcon: ({ tintColor }) => (
                     <Icon
                       name='hospital-o'
                       type='font-awesome'            
@@ -510,7 +514,7 @@ class Main extends Component {
             buttonStyle: {marginBottom: 40}});
             break;
         case 'cellular':
-            Toast.show ({ text: 'You are now on Cellular', duration: 4000, textStyle: {textAlign: 'center'},
+            Toast.show ({ text: 'You are now Using Mobile data', duration: 4000, textStyle: {textAlign: 'center'},
             buttonStyle: {marginBottom: 40}});
             break;
         case 'unknown' :
@@ -550,11 +554,12 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       flex: 1,
-      flexDirection: 'row'
+      flexDirection: 'row',
+      borderRadius: 40
     },
     drawerHeaderText: {
       color: '#1f3c88',
-      fontSize: 24,
+      fontSize: normalize(24),
       fontWeight: 'bold',
     },
     drawerImage: {

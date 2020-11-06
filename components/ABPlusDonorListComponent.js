@@ -20,10 +20,6 @@ class ABPlusDonorList extends Component {
     }
     render() {
 
-        const availability = ({willing}) => {
-            return ((!willing) ? 'Available': 'Un-Available');
-        }
-
         const renderListItem = ({ item , index}) => (
                 <ListItem
                     bottomDivider
@@ -31,12 +27,12 @@ class ABPlusDonorList extends Component {
                     key={index}
                     containerStyle={{backgroundColor: '#200019'}}
                     pad = {30}
-                    onPress= {() => this.props.navigation.navigate('User Details')}
+                    onPress= {() => this.props.navigation.navigate('User Details', {userId: item.uid})}
                 >   
                     <Avatar rounded size={'medium'} source={{uri: item.imageUrl}} icon={{name: 'user', type: 'font-awesome'}}/>
                     <ListItem.Content>
                         <ListItem.Title style={{fontWeight: 'bold', color: 'white'}}>{item.firstname + ' ' + item.lastname}</ListItem.Title>
-                        <ListItem.Subtitle style={{color: 'white'}}>{availability(item.willing)}</ListItem.Subtitle>
+                        <ListItem.Subtitle style={{color: 'white'}}>{(item.willing)?'Available': 'Not-Available'}</ListItem.Subtitle>
                     </ListItem.Content>
                     <ListItem.Chevron/>
                 </ListItem>
@@ -61,7 +57,7 @@ class ABPlusDonorList extends Component {
                     <FlatList
                         data={this.props.users.users.filter((user) => user.bloodgroup === 'AB+')}
                         renderItem={renderListItem}
-                        keyExtractor={item => item._id.toString()}
+                        keyExtractor={item => item.uid.toString()}
                         />
             </SafeAreaView>
         );

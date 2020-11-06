@@ -2,16 +2,17 @@ import React, {Component} from 'react';
 import { View, Image, ImageBackground, Text, StyleSheet, Linking} from 'react-native';
 import { Card, Icon, SocialIcon } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
+import {normalize} from '../assets/fonts/DynamicFontSize';
 
 class MeetDeveloper extends Component {
 
     render() {
         return (
-    
-            <View style={{backgroundColor: '#f0fff3', flex: 1, flexDirection: 'column', alignItems:'center'}}>
-                <Card containerStyle={{height: 450, alignItems: 'center', margin: 30}}>
+            <ScrollView style={{backgroundColor: '#f0fff3', flex: 1}}>
+                <View style={{flexDirection: 'column', alignItems:'center'}}>
+                <Card containerStyle={{height: '72%', alignItems: 'center', margin: 30}}>
                     <Card.Title>
-                        <Text>Bhavesh Kumar</Text>
+                        <Text style={{fontSize: normalize(20)}}>Bhavesh Kumar</Text>
                     </Card.Title>
                     <Card.Image style={{height: 300}}>
                         <Image 
@@ -19,14 +20,14 @@ class MeetDeveloper extends Component {
                             style={{height: 300, width: 280}}
                         />
                     </Card.Image>
-                    <View style={{paddingTop: 30}}>
+                    <View style={{padding: 20}}>
                     <Card.Title>
-                        <Text>Full Stack Developer</Text>
+                        <Text style={{fontSize: normalize(18)}}>Full Stack Developer</Text>
                     </Card.Title>
                     </View>
                 </Card>
-                <Text style={{fontWeight: 'bold', fontSize: 25, paddingTop: 20, paddingBottom: 10}}>Let's Have a talk ! </Text>
-                <View style={{flex: 1, flexDirection: 'row'}}>
+                <Text style={{fontWeight: 'bold', fontSize: normalize(25), paddingTop: 20, paddingBottom: 10, height: '11%'}}>Let's Have a talk ! </Text>
+                <View style={{flex: 1, flexDirection: 'row', height: '17%'}}>
                     <SocialIcon 
                         type='linkedin'
                         raised={true}
@@ -55,8 +56,8 @@ class MeetDeveloper extends Component {
                         
                     />
                 </View>
-                
-            </View>
+                </View>
+            </ScrollView>
         );
     }
 }

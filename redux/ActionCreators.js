@@ -40,8 +40,8 @@ export const addUser = (user, creds) => (dispatch) => {
         return;
     }
 
-if(creds.blob)
-{var image = creds.blob;
+if(creds.blob) {
+var image = creds.blob;
 
     // Upload file and metadata to the object 'images/mountains.jpg'
 var uploadTask = storage.ref().child('usersProfilePic/' + user.uid.toString()).put(image);
@@ -65,13 +65,36 @@ uploadTask.on('state_changed', // or 'state_changed'
 }, function() {
   // Upload completed successfully, now we can get the download URL
   uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-    creds.imageUrl = downloadURL;
 
-    user.updateProfile({
+      user.updateProfile({
         displayName: creds.firstname,
         photoURL: downloadURL.toString()
       }).then(function() {
-        // Update successful.
+        
+        firestore.collection('users').add({
+          uid: user.uid,
+          firstname: creds.firstname,
+          lastname: creds.lastname,
+          gender: creds.gender,
+          bloodgroup: creds.bloodgroup,
+          contactnumber: creds.contactnumber,
+          locality: creds.locality,
+          city: creds.city,
+          state: creds.state,
+          country: creds.country,
+          disease: creds.disease,
+          willing: creds.willing,
+          imageUrl: user.photoURL,
+          email: creds.email,
+          password: creds.password,
+          createdAt: firebasestore.FieldValue.serverTimestamp(),
+          updatedAt: firebasestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+          dispatch(fetchUsers());
+      })
+      .catch(error => { console.log('added user', error.message);
+          alert(null,error.message); })
       }).catch(function(error) {
         // An error happened.
       });
@@ -83,36 +106,36 @@ else {
     user.updateProfile({
         displayName: creds.firstname
       }).then(function() {
-        // Update successful.
+        
+        firestore.collection('users').add({
+          uid: user.uid,
+          firstname: creds.firstname,
+          lastname: creds.lastname,
+          gender: creds.gender,
+          bloodgroup: creds.bloodgroup,
+          contactnumber: creds.contactnumber,
+          locality: creds.locality,
+          city: creds.city,
+          state: creds.state,
+          country: creds.country,
+          disease: creds.disease,
+          willing: creds.willing,
+          imageUrl: creds.imageUrl,
+          email: creds.email,
+          password: creds.password,
+          createdAt: firebasestore.FieldValue.serverTimestamp(),
+          updatedAt: firebasestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+          dispatch(fetchUsers());
+      })
+      .catch(error => { console.log('added user', error.message);
+          alert(null,error.message); })
       }).catch(function(error) {
         // An error happened.
       });
 }
 
-    return firestore.collection('users').add({
-        uid: user.uid,
-        firstname: creds.firstname,
-        lastname: creds.lastname,
-        gender: creds.gender,
-        bloodgroup: creds.bloodgroup,
-        contactnumber: creds.contactnumber,
-        locality: creds.locality,
-        city: creds.city,
-        state: creds.state,
-        country: creds.country,
-        disease: creds.disease,
-        willing: creds.willing,
-        imageUrl: creds.imageUrl,
-        email: creds.email,
-        password: creds.password,
-        createdAt: firebasestore.FieldValue.serverTimestamp(),
-        updatedAt: firebasestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-        dispatch(fetchUsers());
-    })
-    .catch(error => { console.log('Post comments ', error.message);
-        alert(null,error.message); })
 }
 
 export const registerUser = (creds, navigation) => (dispatch) => {
@@ -120,7 +143,9 @@ export const registerUser = (creds, navigation) => (dispatch) => {
             auth.createUserWithEmailAndPassword(creds.email, creds.password)
             .then(() => {
                 var user = auth.currentUser;
-                this.props.addUser(user, creds);
+                //this.props.addUser(user, creds);
+                //addProfilePic(user, creds);
+                dispatch(addUser(user, creds));
                 
                 Alert.alert(
                     'You are Succesfully registered!!',
@@ -201,4 +226,184 @@ export const logoutUser = (navigation) => (dispatch) => {
         dispatch(logoutFailure(error.message));
       });
 
+}
+
+export const updateRequest = () => {
+    return {
+        type: ActionTypes.UPDATE_PROFILE_REQUEST
+    }
+};
+
+export const updateSuccess = (user) => {
+    return {
+        type: ActionTypes.UPDATE_PROFILE_SUCCESS,
+        user
+    }
+};
+
+export const updateFailure = (message) => {
+    return {
+        type: ActionTypes.UPDATE_PROFILE_FAILURE,
+        message
+    }
+};
+
+export const profileUpdate = (newCreds, docId, User, navigation) => (dispatch) => {
+
+    dispatch(updateRequest());
+
+    var user = auth.currentUser;
+    if (!user) {
+        console.log('No user logged in!');
+        return;
+    }
+
+    if(newCreds.blob) {
+    var image = newCreds.blob;
+
+    var deletePrev = storage.ref().child('usersProfilePic/' + user.uid.toString());
+
+    deletePrev.delete()
+    .then(() => {
+        console.log('old profile pic deleted.');
+    })
+    .catch((error) => {
+        console.log('deletion failed');
+    });
+        // Upload file and metadata to the object 'images/mountains.jpg'
+    var uploadTask = storage.ref().child('usersProfilePic/' + user.uid.toString()).put(image);
+
+    // Listen for state changes, errors, and completion of the upload.
+    uploadTask.on('state_changed', // or 'state_changed'
+    function(snapshot) {
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        switch (snapshot.state) {
+        case 'paused': // or 'paused'
+            console.log('Upload is paused');
+            break;
+        case 'running': // or 'running'
+            console.log('Upload is running');
+            break;
+        }
+    }, function(error) {
+        Alert.alert(error.message);
+    }, function() {
+    // Upload completed successfully, now we can get the download URL
+    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+
+        user.updateProfile({
+            displayName: newCreds.firstname,
+            photoURL: downloadURL.toString()
+        }).then(function() {
+            var update = {};
+
+            update.imageUrl = downloadURL.toString();
+            
+            if(User.firstname.toString() !== newCreds.firstname.toString())
+                update.firstname = newCreds.firstname.toString();
+            
+            if(User.lastname.toString() !== newCreds.lastname.toString())
+                update.lastname = newCreds.lastname.toString();
+        
+            if(User.contactnumber.toString() !== newCreds.contactnumber.toString())
+                update.contactnumber = newCreds.contactnumber.toString();
+        
+            if(User.firstname.toString() !== newCreds.firstname.toString())
+            update.firstname = newCreds.firstname.toString();
+        
+            if(User.locality.toString() !== newCreds.locality.toString())
+                update.locality = newCreds.locality.toString();
+        
+            if(User.city.toString() !== newCreds.city.toString())
+                update.city = newCreds.city.toString();
+        
+            if(User.state.toString() !== newCreds.state.toString())
+                update.state = newCreds.state.toString();
+        
+            if(User.country.toString() !== newCreds.country.toString())
+                update.country = newCreds.country.toString();
+            
+            if(User.disease.toString() !== newCreds.disease.toString())
+                update.disease = newCreds.disease.toString();
+        
+            if(User.willing !== newCreds.willing)
+                update.willing = newCreds.willing;
+        
+            return firestore.collection('users').doc(docId.toString())
+            .update(update)
+            .then(() => {
+                var user = auth.currentUser;
+                dispatch(updateSuccess(user));
+                Alert.alert('Account Update Successful!!', 'Your account has been updated as per the new changes. You can now restart your application')
+                navigation.navigate('Home');
+            })
+            .catch( (error) => {
+                Alert.alert('Account Update Unsuccessful!!', error.message);
+                disease(updateFailure(error.message));
+            });
+        }) 
+        .catch(function(error) {
+            // An error happened.
+        });
+        console.log('File available at', downloadURL);
+    });
+    });
+    }
+    else {
+        user.updateProfile({
+            displayName: newCreds.firstname
+        }).then(function() {
+            var update = {};
+            
+            if(User.firstname.toString() !== newCreds.firstname.toString())
+                update.firstname = newCreds.firstname.toString();
+            
+            if(User.lastname.toString() !== newCreds.lastname.toString())
+                update.lastname = newCreds.lastname.toString();
+        
+            if(User.contactnumber.toString() !== newCreds.contactnumber.toString())
+                update.contactnumber = newCreds.contactnumber.toString();
+        
+            if(User.firstname.toString() !== newCreds.firstname.toString())
+            update.firstname = newCreds.firstname.toString();
+        
+            if(User.locality.toString() !== newCreds.locality.toString())
+                update.locality = newCreds.locality.toString();
+        
+            if(User.city.toString() !== newCreds.city.toString())
+                update.city = newCreds.city.toString();
+        
+            if(User.state.toString() !== newCreds.state.toString())
+                update.state = newCreds.state.toString();
+        
+            if(User.country.toString() !== newCreds.country.toString())
+                update.country = newCreds.country.toString();
+            
+            if(User.disease.toString() !== newCreds.disease.toString())
+                update.disease = newCreds.disease.toString();
+        
+            if(User.willing !== newCreds.willing)
+                update.willing = newCreds.willing;
+        
+            return firestore.collection('users').doc(docId.toString())
+            .update(update)
+            .then(() => {
+                var user = auth.currentUser;
+                dispatch(updateSuccess(user));
+                Alert.alert('Account Update Successful!!', 'Your account has been updated as per the new changes.')
+                navigation.navigate('Home');
+            })
+            .catch( (error) => {
+                Alert.alert('Account Update Unsuccessful!!', error.message);
+                dispatch(updateFailure(error.message));
+            });
+            
+        }).catch(function(error) {
+            // An error happened.
+        });
+    }
+
+   
 }
