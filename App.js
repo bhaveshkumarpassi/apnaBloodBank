@@ -8,6 +8,8 @@ import { PersistGate } from 'redux-persist/es/integration/react'
 import {Loading} from './components/LoadingComponent';
 import { AppLoading } from 'expo';
 
+
+
 const {persistor, store }= ConfigureStore();
 
 export default class App extends React.Component {

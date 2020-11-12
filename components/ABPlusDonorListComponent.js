@@ -20,6 +20,8 @@ class ABPlusDonorList extends Component {
     }
     render() {
 
+        //var l = this.props.users.users.length;
+
         const renderListItem = ({ item , index}) => (
                 <ListItem
                     bottomDivider

@@ -14,6 +14,7 @@ import {connect} from 'react-redux';
 import {addUser, fetchUsers, loginUser, logoutUser} from '../redux/ActionCreators';
 import { auth } from '../firebase/firebase';
 import {normalize} from '../assets/fonts/DynamicFontSize';
+
 //import { baseUrl } from '../shared/baseUrl';
 
 
@@ -198,6 +199,7 @@ class RegisterTab extends ValidationComponent {
         this.unsubscribe();
     }
 
+
     onGenderValueChange(value) {
         this.setState({
           gender: value
@@ -241,7 +243,7 @@ class RegisterTab extends ValidationComponent {
                 var user = auth.currentUser;
                 this.props.addUser(user, creds);
                 Alert.alert(
-                    'You are Succesfully registered!!',
+                    'Registration Successful!!',
                     'Now you can head over to Home Screen.'
                 );
                 this.props.navigation.navigate('Home');

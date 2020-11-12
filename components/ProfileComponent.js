@@ -34,8 +34,8 @@ class Profile extends Component {
         this.state = {
             isAuthenticated: false,
             editable: false,
-            gender: '',
-            bloodgroup: '',
+            gender: 'Female',
+            bloodgroup: 'O+',
             email: '',
             password: '',
             firstname: '',
@@ -189,11 +189,11 @@ class Profile extends Component {
                             <View style={{flex: 1}}>
                             <ScrollView>
                                 <View style={{ height: screenHeight-1115, paddingVertical: 5}}>
-                                <Image
-                                            source={{uri: this.state.imageUrl}}
-                                            style={{height: '100%', width: 250, alignSelf: 'center', borderRadius: 10}}
-                                            PlaceholderContent={<ActivityIndicator />}
-                                        />
+                                    <Image
+                                        source={{uri: this.state.imageUrl}}
+                                        style={{height: '100%', width: 250, alignSelf: 'center', borderRadius: 10}}
+                                        PlaceholderContent={<ActivityIndicator />}
+                                    />
                                 
                                 </View>
                                 <Card containerStyle={{ backgroundColor: '#c6f1e7', 

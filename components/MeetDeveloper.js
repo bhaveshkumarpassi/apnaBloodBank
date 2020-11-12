@@ -21,9 +21,9 @@ class MeetDeveloper extends Component {
                         />
                     </Card.Image>
                     <View style={{padding: 20}}>
-                    <Card.Title>
-                        <Text style={{fontSize: normalize(18)}}>Full Stack Developer</Text>
-                    </Card.Title>
+                        <Card.Title>
+                            <Text style={{fontSize: normalize(18)}}>Full Stack Developer</Text>
+                        </Card.Title>
                     </View>
                 </Card>
                 <Text style={{fontWeight: 'bold', fontSize: normalize(25), paddingTop: 20, paddingBottom: 10, height: '11%'}}>Let's Have a talk ! </Text>

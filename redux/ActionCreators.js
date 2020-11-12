@@ -405,5 +405,168 @@ export const profileUpdate = (newCreds, docId, User, navigation) => (dispatch) =
         });
     }
 
-   
 }
+
+export const deleteCampRequest = (docId) => (dispatch) => {
+
+    if (!auth.currentUser) {
+        console.log('No user logged in!');
+        return;
+    }
+
+    var user = auth.currentUser;
+
+    return firestore.collection('campRequests').doc(docId).delete()
+    .then(() => {
+        dispatch(fetchCampRequests());
+        Alert.alert('Removal Successful!!', 'Camp Request Successfuly removed.');
+    })
+    .catch((error) => {
+        Alert.alert("Deletion Unsuccessful!!", error.message);
+    })
+};
+
+export const addCampRequest = (campRequest) => ({
+    type: ActionTypes.ADD_CAMP_REQUEST,
+    payload: campRequest
+});
+
+export const postCampRequest = (campRequest) => (dispatch) => {
+
+    if (!auth.currentUser) {
+        console.log('No user logged in!');
+        return;
+    }
+
+    return firestore.collection('campRequests').add({
+        author: {
+            '_id': auth.currentUser.uid,
+            'firstname' : auth.currentUser.displayName ? auth.currentUser.displayName : auth.currentUser.email
+        },
+        organisation: campRequest.organisation,
+        association: campRequest.association,
+        associationAddress: campRequest.associationAddress,
+        venueLocality: campRequest.venueLocality,
+        venueCity: campRequest.venueCity,
+        venueState: campRequest.venueState,
+        venueCountry: campRequest.venueCountry,
+        designation: campRequest.designation,
+        contactnumber: campRequest.contactnumber,
+        dateTime: campRequest.dateTime,
+        date: campRequest.date,
+        time: campRequest.time,
+        duration: campRequest.duration,
+        dateString: campRequest.dateString,
+        fullName: campRequest.fullName,
+        createdAt: firebasestore.FieldValue.serverTimestamp(),
+        updatedAt: firebasestore.FieldValue.serverTimestamp()
+    })
+    .then(docRef => {
+
+        firestore.collection('users').get()
+        .then(snapshot => {
+
+            var users = [];
+            snapshot.forEach(doc => {
+                const data = doc.data()
+                const _id = doc.id
+                users.push({_id, ...data });
+            });
+            return users;
+        })
+        .then(async (users) => {
+
+            for(var i=0;i<users.length;i++) {
+                await firestore.collection('campRequests').doc(docRef.id).collection('responses')
+                .doc(users[i].uid.toString()).set({
+                    viewed: false,
+                    accepted: false
+                })
+                .then(() => (console.log('added')))
+                .catch((error) => (console.log(error.message)));
+            }
+
+            return docRef;
+        })
+        .then((docRef) => {
+                    firestore.collection('campRequests').doc(docRef.id).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            const _id = doc.id;
+                            let campRequest = {_id, ...data};
+                            firestore.collection('campRequests').doc(_id).collection('responses').get()
+                            .then(snapshot => {
+
+                                var responses = [];
+                                snapshot.forEach(doc => {
+                                    const data = doc.data()
+                                    const _id = doc.id
+                                    responses.push({_id, ...data });
+                                });
+                                return responses;
+                            })
+                            .then((responses) => campRequest.responses = responses)
+                            .catch((err) => console.log(err.message));
+
+                            return campRequest;
+                        } else {
+                            // doc.data() will be undefined in this case
+                            console.log("No such document!");
+                        }
+                    })
+                    .then((campRequest) => {
+                        dispatch(addCampRequest(campRequest));
+                    })
+                    .catch((err) => console.log(err.message));
+            })
+            .catch(error => { console.log('Post campRequests ', error.message);
+                Alert.alert('CampRequest Post Unsuccessful!!',error.message); })
+        })
+        .catch((err) => console.log(err.message));
+
+}
+
+export const fetchCampRequests = () => (dispatch) => {
+
+    dispatch(campRequestsLoading(true));
+    return firestore.collection('campRequests').get()
+        .then(snapshot => {
+            let campRequests = [];
+            snapshot.forEach(doc => {
+                const data = doc.data()
+                const _id = doc.id
+
+                firestore.collection('campRequests').doc(_id).collection('responses').get()
+                .then(snapshot => {
+
+                    var responses = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data()
+                        const _id = doc.id
+                        responses.push({_id, ...data });
+                    });
+                    return responses;
+                })
+                .then((responses) => campRequests.push({_id,responses, ...data }))
+                .catch((err) => console.log(err.message));
+            });
+            return campRequests;
+        })
+        .then(campRequests => dispatch(addCampRequests(campRequests)))
+        .catch(error => dispatch(campRequestsFailed(error.message)));
+}
+
+export const campRequestsFailed = (errmess) => ({
+    type: ActionTypes.CAMP_REQUESTS_FAILED,
+    payload: errmess
+});
+
+export const addCampRequests = (campRequests) => ({
+    type: ActionTypes.ADD_CAMP_REQUESTS,
+    payload: campRequests
+});
+
+export const campRequestsLoading = () => ({
+    type: ActionTypes.CAMP_REQUESTS_LOADING,
+});

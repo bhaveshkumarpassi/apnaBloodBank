@@ -11,7 +11,7 @@ import Login from './LoginComponent';
 import Profile from './ProfileComponent';
 import NeedDonor from './NeedDonorComponent';
 import DonationCamp from './DonationCamp';
-import Notifications from './NotificationsComponent';
+import Notification from './NotificationsComponent';
 import Loading from './LoadingComponent';
 import { color } from 'react-native-reanimated';
 import MeetDeveloper from './MeetDeveloper';
@@ -25,7 +25,7 @@ import ABPlusDonorList from './ABPlusDonorListComponent';
 import ABMinusDonorList from './ABMinusDonorListComponent';
 import UserDetail from './UserDetailComponent';
 import {connect} from 'react-redux';
-import {fetchUsers} from '../redux/ActionCreators';
+import {fetchUsers, fetchCampRequests} from '../redux/ActionCreators';
 import { auth } from '../firebase/firebase';
 import { Root, Toast } from 'native-base';
 import {normalize} from '../assets/fonts/DynamicFontSize';
@@ -34,14 +34,16 @@ import { heightPercentageToDP } from 'react-native-responsive-screen';
 const mapStateToProps = (state) => {
     
     return {
-        users: state.users
+        users: state.users,
+        campRequests: state.campRequests
     };
 }
 
 const mapDispatchToProps = dispatch => {
     
     return {
-        fetchUsers: () => dispatch(fetchUsers())
+        fetchUsers: () => dispatch(fetchUsers()),
+        fetchCampRequests: () => dispatch(fetchCampRequests())
     };
 }
 
@@ -81,6 +83,16 @@ function ProfileNavigatorScreen() {
                             onPress={() => 
                                 navigation.toggleDrawer()}
                         />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='user'
+                            type='font-awesome' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        />
                     )
                 
                 })}
@@ -114,6 +126,16 @@ function LoginNavigatorScreen() {
                             iconStyle={{marginLeft: 10}}
                             onPress={() => 
                                 navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='sign-in'
+                            type='font-awesome' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
                         />
                     )
                 
@@ -149,7 +171,18 @@ function NeedDonorNavigatorScreen() {
                             onPress={() => 
                                 navigation.toggleDrawer()}
                         />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='tint'
+                            type='font-awesome' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        />
                     )
+                
                 
                 })}
             />
@@ -255,6 +288,16 @@ function DonationCampNavigatorScreen(){
                             onPress={() => 
                                 navigation.toggleDrawer()}
                         />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='medkit'
+                            type='font-awesome-5'
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        />
                     )
                 
                 })}
@@ -268,26 +311,36 @@ function NotificationsNavigatorScreen() {
         <NotificationsNavigator.Navigator
             screenOptions={{
                 headerStyle: {
-                    backgroundColor: "#fa4659"
+                    backgroundColor: '#85cfcb'
                 },
-                headerTintColor: "#fff",
+                headerTintColor: '#200019',
                 headerTitleStyle: {
-                    color: "#fff"            
+                    color: '#200019'            
                 }
             }}
         >
             <NotificationsNavigator.Screen
                 name="Notifications"
-                component={Notifications}
+                component={Notification}
                 options={{headerTitle: "Notifications"},({navigation}) => ({
                     headerLeft: () => (
                         <Icon 
                             name='menu' 
                             size={24}
-                            color='white'
+                            color='#200019'
                             iconStyle={{marginLeft: 10}}
                             onPress={() => 
                                 navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='bell'
+                            type='font-awesome'
+                            size={24}
+                            color='#200019'
+                            iconStyle={{marginRight: 10}}
                         />
                     )
                 
@@ -317,12 +370,22 @@ function HomeNavigatorScreen(){
                 options={{headerTitle: "Home"},({navigation}) => ({
                     headerLeft: () => (
                         <Icon 
-                            name='menu' 
+                            name='menu'
                             size={24}
                             color='white'
                             iconStyle={{marginLeft: 10}}
                             onPress={() => 
                                 navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='home'
+                            type='font-awesome'
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
                         />
                     )
                 
@@ -359,6 +422,16 @@ function MeetDeveloperNavigatorScreen() {
                             iconStyle={{marginLeft: 10}}
                             onPress={() => 
                                 navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='handshake'
+                            type='font-awesome-5'
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
                         />
                     )
                 
@@ -455,8 +528,8 @@ function MainNavigatorScreen() {
                 component={DonationCampNavigatorScreen}
                 options={{headerTitle: "Blood Donation Camp"},{drawerIcon: ({ tintColor }) => (
                     <Icon
-                      name='hospital-o'
-                      type='font-awesome'            
+                      name='medkit'
+                      type='font-awesome-5'            
                       size={22}
                       color={tintColor}
                     />
@@ -495,13 +568,14 @@ class Main extends Component {
 
   componentDidMount() {
       this.props.fetchUsers();
-    
+      this.props.fetchCampRequests();
     window.value = NetInfo.addEventListener(connectionInfo => this.handleConnectivityChange(connectionInfo))
   }
 
   componentWillUnmount() {
         window.value();
   }
+
 
   handleConnectivityChange = (connectionInfo) => {
     switch (connectionInfo.type) {
@@ -514,7 +588,7 @@ class Main extends Component {
             buttonStyle: {marginBottom: 40}});
             break;
         case 'cellular':
-            Toast.show ({ text: 'You are now Using Mobile data', duration: 4000, textStyle: {textAlign: 'center'},
+            Toast.show ({ text: 'You are now using Mobile data', duration: 4000, textStyle: {textAlign: 'center'},
             buttonStyle: {marginBottom: 40}});
             break;
         case 'unknown' :
@@ -555,7 +629,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       flex: 1,
       flexDirection: 'row',
-      borderRadius: 40
+      borderBottomColor: '#c6f1e7',
+      borderBottomWidth: 10
     },
     drawerHeaderText: {
       color: '#1f3c88',

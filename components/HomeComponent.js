@@ -8,6 +8,7 @@ import { auth, firestore, fireauth, firebasestore } from '../firebase/firebase';
 import { connect } from 'react-redux';
 import { logoutUser } from '../redux/ActionCreators';
 import {fetchUsers} from '../redux/ActionCreators';
+import {fetchCampRequests} from '../redux/ActionCreators';
 import UserDetailComponent from './UserDetailComponent';
 import {normalize} from '../assets/fonts/DynamicFontSize';
 import {widthToDp, heightToDp} from '../responsive';
@@ -25,7 +26,8 @@ const mapDispatchToProps = (dispatch) => {
     
   return {
       fetchUsers: () => dispatch(fetchUsers()),
-      logoutUser: (navigation) => dispatch(logoutUser(navigation))
+      logoutUser: (navigation) => dispatch(logoutUser(navigation)),
+      fetchCampRequests: () => dispatch(fetchCampRequests())
   };
 }
 
@@ -41,12 +43,13 @@ class Home extends Component {
        }
     }
 
-  async componentDidMount() {
+  componentDidMount() {
 
     this.unsubscribe =  auth.onAuthStateChanged(user => {
       
         if(user) {
- 
+          
+          this.props.fetchCampRequests();
           if(user.photoURL)
           {
             this.setState({
