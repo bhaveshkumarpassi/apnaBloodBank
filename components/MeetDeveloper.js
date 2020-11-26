@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Image, ImageBackground, Text, StyleSheet, Linking} from 'react-native';
+import { View, Image, Text, Linking} from 'react-native';
 import { Card, Icon, SocialIcon } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import {normalize} from '../assets/fonts/DynamicFontSize';
@@ -53,7 +53,7 @@ class MeetDeveloper extends Component {
                         name={'envelope-square'}
                         type='font-awesome-5'
                         color='#512DA8'
-                        
+                        onPress={() => Linking.openURL('mailto:bkpassi2017@gmail.com')}
                     />
                 </View>
                 </View>

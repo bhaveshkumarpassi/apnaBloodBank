@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, ImageBackground, Text, StyleSheet, ActivityIndicator, Dimensions, TouchableOpacity, Alert} from 'react-native';
+import { View, ImageBackground, Text, ActivityIndicator, Dimensions, TouchableOpacity, Alert, RefreshControl} from 'react-native';
 import {Icon, Button, Card, Image, Input} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import {normalize} from '../assets/fonts/DynamicFontSize';
@@ -7,12 +7,9 @@ import Modal from 'react-native-modal';
 import { connect } from 'react-redux';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Moment from 'moment';
-import * as Permissions from 'expo-permissions';
-import * as Notifications from 'expo-notifications';
-import { auth, firestore, fireauth, firebasestore , storage} from '../firebase/firebase';
-import {postCampRequest} from '../redux/ActionCreators';
+import { auth, firestore} from '../firebase/firebase';
+import { postCampRequest} from '../redux/ActionCreators';
 import {deleteCampRequest} from '../redux/ActionCreators';
-
 
 const  mapStateToProps = (state) => {
     return{
@@ -99,10 +96,39 @@ class DonationCamp extends Component {
         });
     }
 
-    handleSubmit() {
+    async sendNotification(token, notification) {
+
+        const message = {
+            to: token,
+            sound: 'default',
+            title: 'Blood Donation Camp',
+            body: notification,
+            data: { data: 'goes here' },
+          };
+        
+          await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+          });
+    }
+
+    async sendNotificationToAllUsers(message) {
+
+        (await firestore.collection('users').get()).docs.map(user => this.sendNotification(user.data().token, message));
+    }
+
+    async handleSubmit() {
 
         console.log(JSON.stringify(this.state));
-        this.props.postCampRequest(this.state);
+        await this.props.postCampRequest(this.state);
+        await this.sendNotificationToAllUsers('A Blood Donation Camp is going to be organised by '+  this.state.organisation +
+        ' in association with ' + this.state.association + '\n' + ' The Date and Time for the same is : ' + '\n' + this.state.dateTime +
+        '\n' + 'The Address of the Venue of camp is : ' + '\n' + this.state.venueLocality + ' ' + this.state.venueCity + ' ' + this.state.venueState);
 
         this.setState({
             organisation: '',

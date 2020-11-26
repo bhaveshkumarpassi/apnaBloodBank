@@ -1,12 +1,10 @@
 import { Icon } from 'native-base';
 import React, {Component} from 'react';
-import { View, Image, ImageBackground, Text, StyleSheet, FlatList, ScrollView, SafeAreaView} from 'react-native';
-import {ListItem, Card, Avatar, Button} from 'react-native-elements';
+import { View, Text, FlatList, SafeAreaView} from 'react-native';
+import {ListItem, Card, Avatar, SearchBar} from 'react-native-elements';
 import {connect} from 'react-redux';
-import {fetchUsers} from '../redux/ActionCreators';
 import {Loading} from './LoadingComponent';
-import PTRView from 'react-native-pull-to-refresh';
-
+import { auth } from '../firebase/firebase';
 
 const mapStateToProps = (state) => {
 
@@ -20,7 +18,55 @@ class APlusDonorList extends Component {
     constructor(props) {
         super(props);
         
+        this.state={
+            searchString: '',
+            data : [],
+        }
+
+        this.arrayHolder = [];
     }
+
+    componentDidMount() {
+
+        this.setState({
+            data: this.props.users.users.filter((user) => user.bloodgroup === 'A+' && user.uid !== auth.currentUser.uid)
+        })
+
+        this.arrayHolder = this.props.users.users.filter((user) => user.bloodgroup === 'A+' && user.uid !== auth.currentUser.uid) ;
+    }
+
+    searchFilterFunction = text => {
+        this.setState({
+          value: text,
+        });
+    
+        const newData = this.arrayHolder.filter(item => {
+          const itemData = `${item.locality.toUpperCase()} ${item.city.toUpperCase()} ${item.state.toUpperCase()}  ${item.country.toUpperCase()}`;
+          const textData = text.toUpperCase();
+    
+          return itemData.indexOf(textData) > -1;
+        });
+
+        this.setState({
+          data: newData,
+        });
+      };
+
+    renderHeader = () => {
+        return (
+          <SearchBar
+            placeholder="Filter donor's locality, city, state, country ...  "
+            multiline
+            clear
+            round
+            onChangeText={searchString => this.searchFilterFunction(searchString)}
+            autoCorrect={false}
+            value={this.state.value}
+            clearIcon={{size: 20}}
+            searchIcon={{size: 25}}
+          />
+        );
+      };
 
     render() {
 
@@ -31,7 +77,7 @@ class APlusDonorList extends Component {
                     key={index}
                     containerStyle={{backgroundColor: '#200019'}}
                     pad = {30}
-                    onPress= {() => this.props.navigation.navigate('User Details', {userId: item.uid})}
+                    onPress= {() => (item.willing) ? this.props.navigation.navigate('User Details', {userId: item.uid}) : console.log('not available')}
                 >   
                     <Avatar rounded size={'medium'} source={{uri: item.imageUrl}} icon={{name: 'user', type: 'font-awesome'}}/>
                     <ListItem.Content>
@@ -59,9 +105,10 @@ class APlusDonorList extends Component {
         return (
             <SafeAreaView>
                     <FlatList
-                        data={this.props.users.users.filter((user) => user.bloodgroup === 'A+')}
+                        data={this.state.data}
                         renderItem={renderListItem}
                         keyExtractor={item => item.uid.toString()}
+                        ListHeaderComponent={this.renderHeader}
                         />
             </SafeAreaView>
 

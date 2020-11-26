@@ -17,3 +17,13 @@ const {
       return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
     }
   }
+
+  const scaleHt = SCREEN_HEIGHT / 375;
+  export function normalizeHt(size) {
+    const newSize = size * scale 
+    if (Platform.OS === 'ios') {
+      return Math.round(PixelRatio.roundToNearestPixel(newSize))
+    } else {
+      return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
+    }
+  }

@@ -1,19 +1,16 @@
 import React, {Component} from 'react';
-import { View, Image, ImageBackground, Text, StyleSheet, FlatList, SafeAreaView, Dimensions, Linking, Share, Alert, Platform} from 'react-native';
-import {Icon, Button, ListItem, Avatar} from 'react-native-elements';
+import { View, ImageBackground, Text, FlatList, Dimensions, Linking, Share, Alert, Platform, EventEmitter} from 'react-native';
+import {Icon, Button, ListItem} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import {normalize} from '../assets/fonts/DynamicFontSize';
-import {fetchCampRequests} from '../redux/ActionCreators';
 import { connect } from 'react-redux';
 import Modal from 'react-native-modal';
 import * as Calendar from 'expo-calendar';
 import * as Permissions from 'expo-permissions';
-//import { Notifications } from 'expo';
 import * as Notifications from 'expo-notifications';
-import { auth, firestore, fireauth, firebasestore , storage} from '../firebase/firebase';
-import { Loading } from './LoadingComponent';
+import { auth, firestore } from '../firebase/firebase';
 import MapView from 'react-native-maps';
-
+import {fetchUsers, fetchCampRequests, fetchBloodRequests} from '../redux/ActionCreators';
 
 
 const mapStateToProps = (state) => {
@@ -21,7 +18,17 @@ const mapStateToProps = (state) => {
     return {
         users: state.users,
         auth: state.auth,
-        CampRequests: state.CampRequests
+        CampRequests: state.CampRequests,
+        BloodRequests: state.BloodRequests
+    };
+}
+
+const mapDispatchToProps = dispatch => {
+    
+    return {
+        fetchUsers: () => dispatch(fetchUsers()),
+        fetchCampRequests: () => dispatch(fetchCampRequests()),
+        fetchBloodRequests: () => dispatch(fetchBloodRequests())
     };
 }
 
@@ -34,12 +41,13 @@ class Notification extends Component {
             isAuthenticated: false,
             isModalVisible: false,
             selectedItem: {},
+            isSecondModalVisible: false
         }
     }
 
     componentDidMount() {
 
-        this.unsubscribe =  auth.onAuthStateChanged(user => {
+        this.unsubscribe = auth.onAuthStateChanged(user => {
     
             if(user) {
               this.setState({
@@ -67,10 +75,25 @@ class Notification extends Component {
         })
     }
 
+    modalSecondSelect(item) {
+
+        this.setState({
+            selectedItem: item,
+            isSecondModalVisible: !this.state.isSecondModalVisible
+        })
+    }
+
     toggleModal() {
 
         this.setState({
             isModalVisible: !this.state.isModalVisible
+        })
+    }
+
+    toggleSecondModal() {
+
+        this.setState({
+            isSecondModalVisible: !this.state.isSecondModalVisible
         })
     }
 
@@ -142,8 +165,6 @@ class Notification extends Component {
   
        await Calendar.createEventAsync(calendarId, {
           title:  'Blood Donation Camp Event',
-          //startDate: date,
-          //endDate: date,
           startDate: new Date(Date.parse(dateString)),
           endDate: new Date(Date.parse(dateString) + parseInt(duration, 10)*3600000),
           timeZone: 'Asia/India',
@@ -168,11 +189,11 @@ class Notification extends Component {
                     content: {
                       title: "Blood Donation Camp",
                       body: 'Thanks for accepting the camp request the event has been marked to your Mobile Default Calendar' + "\n" + 'Hope to See you at Camp!!',
-                      sound: 'email-sound.wav', // <- for Android below 8.0
+                      sound: 'email-sound.wav',
                     },
                     trigger: {
                       seconds: 2,
-                      channelId: 'notify', // <- for Android 8.0+, see definition above
+                      channelId: 'notify',
                     },
                   });
                 
@@ -183,6 +204,19 @@ class Notification extends Component {
         var user = auth.currentUser;
 
         await firestore.collection('campRequests').doc(campRequest._id).collection('responses').doc(user.uid.toString()).
+        update({
+            accepted: isAccepted,
+            viewed: true
+        })
+        .then(() => console.log('Response submitted!!'))
+        .catch((err) => Alert.alert('Status not updated', err.message));
+    }
+
+    async updateDocStatusSecond(bloodRequest, isAccepted) {
+
+        var user = auth.currentUser;
+
+        await firestore.collection('bloodRequests').doc(bloodRequest._id).collection('responses').doc(user.uid.toString()).
         update({
             accepted: isAccepted,
             viewed: true
@@ -204,6 +238,18 @@ class Notification extends Component {
         this.updateDocStatus(campRequest, false);
         this.toggleModal();
     }
+
+    handleSecondAcceptence(bloodRequest) {
+
+        this.updateDocStatusSecond(bloodRequest, true);
+        this.toggleSecondModal();
+    }
+
+    handleSecondDecline(bloodRequest) {
+
+        this.updateDocStatusSecond(bloodRequest, false);
+        this.toggleSecondModal();
+    }
     
     render() {
         if(this.state.isAuthenticated) {
@@ -219,6 +265,116 @@ class Notification extends Component {
 
                 }, { dialogTitle: 'Share' + title})
             }
+
+            const MyModal2 = (props) => {
+                var shareMessage = props.selectedItem.units + ' ' + props.selectedItem.bloodgroup + ' Blood needed urgently within '+  props.selectedItem.dateTime +
+                '\n' + 'At : ' + '\n' + props.selectedItem.locality + ' ' + props.selectedItem.city + ' ' + props.selectedItem.state + '\n' +
+                'You can get more details by contacting : '+ '\n' + 'Name: ' + props.selectedItem.contactholder + '\n' + 'Contact Number: ' + props.selectedItem.contactnumber;
+
+                return (
+                <Modal 
+                            isVisible={props.isModalVisible}
+                            style={{backgroundColor: '#ffffff', 
+                                    borderRadius: 10,
+                                    height: screenHeight
+                            }}
+                            animationIn='zoomInUp'
+                            animationOut='zoomOutDown'
+                            animationInTiming={500}
+                            animationOutTiming={500}
+                    
+                            >
+                                <ScrollView>
+                                    <Text style={{textAlign: 'left'}}>
+                                        <Icon 
+                                            name='times-circle'
+                                            type='font-awesome-5' 
+                                            onPress={() => this.toggleSecondModal()}
+                                            size={30}
+                                            />
+                                    </Text>
+                                    <Text style={{marginHorizontal: '3%', marginVertical: '5%', fontSize: normalize(20) }}>
+                                        {props.selectedItem.units} units of {props.selectedItem.bloodgroup} Blood is needed urgently !!
+                                    </Text>
+                                    <Text style={{marginHorizontal: '3%', marginVertical: '5%', fontSize: normalize(20) }}>
+                                        Within : {'\n'} {props.selectedItem.dateTime}
+                                    </Text>
+                                    <Text style={{marginHorizontal: '3%', marginVertical: '5%', fontSize: normalize(20) }}
+                                        onPress={() => Linking.openURL('https://www.google.com/maps/')}
+                                    >
+                                        At Address : {'\n'}{props.selectedItem.locality} {props.selectedItem.city} {props.selectedItem.state} {props.selectedItem.country}
+                                    </Text>
+                                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                                    <MapView 
+                                        style={{height: screenHeight-1000, width: Dimensions.get('window').width-100, marginHorizontal: 50}}
+                                    />
+                                    </View>
+                                    <Text style={{marginHorizontal: '3%', marginVertical: '5%', fontSize: normalize(20) }}>
+                                        Additional Information : {(props.selectedItem.info) ? props.selectedItem.info : 'None'}
+                                    </Text>
+                                    <Text style={{marginHorizontal: '3%', marginVertical: '5%', fontSize: normalize(20) }}>
+                                        You can get more details by contacting : {'\n'} Name : {props.selectedItem.contactholder}
+                                    </Text>
+                                    <Button
+                                    onPress={()=> Linking.openURL('tel:'+props.selectedItem.contactnumber)}
+                                    title=" Call"
+                                    icon={
+                                        <Icon
+                                            name='phone-square'
+                                            type='font-awesome-5'            
+                                            size={24}
+                                            color= 'white'
+                                        />
+                                    }
+                                    buttonStyle={{
+                                        backgroundColor: "#158467",
+                                        borderRadius: 30,
+                                    
+                                    }}
+                                    titleStyle={{padding: '4%'}}
+                                    containerStyle={{marginLeft: '4%', marginRight: '4%', 
+                                        marginBottom: '15%', marginTop: '5%', width: '50%'
+                                    }}
+                                    raised
+                                    />
+                                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', marginBottom: '5%'}}>
+                                            <Icon
+                                                name='share'
+                                                type='font-awesome-5'            
+                                                size={24}
+                                                color= 'white'
+                                                onPress={()=> shareRequest('Blood Needed', shareMessage)}
+                                                raised
+                                                color='#892cdc'
+                                                reverse
+                                            />
+                                            <Icon
+                                                name='check-circle'
+                                                type='font-awesome-5'            
+                                                size={24}
+                                                color= 'white'
+                                                onPress={()=> this.handleSecondAcceptence(props.selectedItem)}
+                                                raised
+                                                reverse
+                                                color='#519872'
+                                            />
+        
+                                            <Icon
+                                                name='times-circle'
+                                                type='font-awesome-5'            
+                                                size={24}
+                                                color= 'white'
+                                                onPress={()=> this.handleSecondDecline(props.selectedItem)}
+                                                raised
+                                                reverse
+                                                color='#ec524b'
+                                            />
+                                    </View>
+                                </ScrollView>
+                            </Modal>
+                );
+            }
+
             const MyModal = (props) => {
 
                 var shareMessage = 'A Blood Donation Camp is going to be organised by '+  props.selectedItem.organisation +
@@ -351,11 +507,30 @@ class Notification extends Component {
                 </ListItem>
                 
             );
+            
+            const renderListItem2 = ({ item , index}) => (
+                <ListItem
+                    bottomDivider
+                    topDivider
+                    key={index}
+                    containerStyle={{backgroundColor: '#200019', height: 100, borderRadius: 25, marginHorizontal: '3%', marginTop: '5%'}}
+                    pad = {30}
+                    onPress= {() => this.modalSecondSelect(item)}
+                >   
+                    <ListItem.Content>
+                        <ListItem.Title style={{fontWeight: 'bold', color: 'white'}}>Blood Needed</ListItem.Title>
+                        <ListItem.Subtitle style={{color: 'white'}}>Within :- {item.dateTime}</ListItem.Subtitle>
+                    </ListItem.Content>
+                    <ListItem.Chevron/>
+                    
+                </ListItem>
+                
+            );
 
-            if(this.props.CampRequests.campRequests)
+            if(this.props.CampRequests.campRequests && this.props.BloodRequests.bloodRequests)
             {
 
-                var dataItems = this.props.CampRequests.campRequests.filter(campRequest => {
+                var dataItems1 = this.props.CampRequests.campRequests.filter(campRequest => {
 
                     if(user && campRequest.responses)
                     {
@@ -364,12 +539,34 @@ class Notification extends Component {
                     }
                 });
 
-                if(dataItems)
+                var dataItems2 = this.props.BloodRequests.bloodRequests.filter(bloodRequest => {
+
+                    if(user && bloodRequest.responses)
+                    {
+                        var resp = bloodRequest.responses.filter((response) => (response._id.toString() === user.uid))[0];
+                        return (resp && resp.viewed === false);
+                    }
+                });
+
+                if(dataItems1.length || dataItems2.length)
                 {
                     return (
-                    <SafeAreaView>
+                
+                    <ScrollView>
                             <FlatList
-                                data={this.props.CampRequests.campRequests.filter(campRequest => {
+                                data={this.props.BloodRequests.bloodRequests.sort((a, b) => b.dateTimeNow-a.dateTimeNow).filter(bloodRequest => {
+
+                                if(user && bloodRequest.responses)
+                                {
+                                    var resp = bloodRequest.responses.filter((response) => (response._id.toString() === user.uid))[0];
+                                    return (resp && resp.viewed === false);
+                                }
+                                })}
+                                renderItem={renderListItem2}
+                                keyExtractor={item => item._id.toString()}
+                            />
+                            <FlatList
+                                data={this.props.CampRequests.campRequests.sort((a, b) => b.dateTimeNow-a.dateTimeNow).filter(campRequest => {
 
                                     if(user && campRequest.responses)
                                     {
@@ -380,19 +577,23 @@ class Notification extends Component {
                                 renderItem={renderListItem}
                                 keyExtractor={item => item._id.toString()}
                                 />
+                            <MyModal2 selectedItem={this.state.selectedItem} isModalVisible={this.state.isSecondModalVisible} />
                             <MyModal selectedItem={this.state.selectedItem} isModalVisible={this.state.isModalVisible}/>
-                    </SafeAreaView>
+                    </ScrollView>
+                    
                 );
                 }
                 else {
                     return (
-                        <Text>No New Notifications for you right now.. </Text>
+                        <View>
+                        <Text style={{fontSize: normalize(20), fontWeight: 'bold', textAlign: 'center', marginVertical: '70%'}}>No New Notifications for you right now.. </Text>
+                        </View>
                     );
                 }
             }
-            else if(this.props.CampRequests.errMess) {
+            else if(this.props.CampRequests.errMess || this.props.BloodRequests.errMess) {
                 return(
-                    <Text>{this.props.CampRequests.errMess}</Text>
+                    <Text>{(this.props.CampRequests.errMess) ? this.props.CampRequests.errMess : this.props.BloodRequests.errMess}</Text>
                 );
             }
         }
@@ -458,4 +659,4 @@ class Notification extends Component {
     }
 }
 
-export default connect(mapStateToProps)(Notification);
+export default connect(mapStateToProps, mapDispatchToProps)(Notification);

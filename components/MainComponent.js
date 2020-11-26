@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
-import {BLOOD} from '../shared/blood';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator, DrawerItemList } from '@react-navigation/drawer';
 import NetInfo from '@react-native-community/netinfo';
-import { View, Platform, ScrollView, Image, StyleSheet, SafeAreaView, Text, ToastAndroid } from 'react-native';
+import { View, Platform, ScrollView, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
 import {Icon} from 'react-native-elements';
 import Home from './HomeComponent';
 import Login from './LoginComponent';
@@ -12,8 +11,6 @@ import Profile from './ProfileComponent';
 import NeedDonor from './NeedDonorComponent';
 import DonationCamp from './DonationCamp';
 import Notification from './NotificationsComponent';
-import Loading from './LoadingComponent';
-import { color } from 'react-native-reanimated';
 import MeetDeveloper from './MeetDeveloper';
 import APlusDonorList from './APlusDonorListComponent';
 import AMinusDonorList from './AMinusDonorListComponent';
@@ -24,18 +21,29 @@ import OMinusDonorList from './OMinusDonorListComponent';
 import ABPlusDonorList from './ABPlusDonorListComponent';
 import ABMinusDonorList from './ABMinusDonorListComponent';
 import UserDetail from './UserDetailComponent';
+import Sharing from './SharingComponent';
+import AddPost from './AddPostComponent';
+import Comments from './CommentsComponent';
+import MyPosts from './MyPosts';
+import DonationHistory from './DonationHistory';
 import {connect} from 'react-redux';
-import {fetchUsers, fetchCampRequests} from '../redux/ActionCreators';
-import { auth } from '../firebase/firebase';
+import {fetchUsers, fetchCampRequests, fetchPosts, fetchLikes, fetchComments, fetchBloodRequests} from '../redux/ActionCreators';
 import { Root, Toast } from 'native-base';
 import {normalize} from '../assets/fonts/DynamicFontSize';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
+import { auth, firestore } from '../firebase/firebase';
 
 const mapStateToProps = (state) => {
     
     return {
         users: state.users,
-        campRequests: state.campRequests
+        campRequests: state.campRequests,
+        bloodRequests: state.bloodRequests,
+        posts: state.posts,
+        likes: state.likes,
+        comments: state.comments
     };
 }
 
@@ -43,7 +51,11 @@ const mapDispatchToProps = dispatch => {
     
     return {
         fetchUsers: () => dispatch(fetchUsers()),
-        fetchCampRequests: () => dispatch(fetchCampRequests())
+        fetchCampRequests: () => dispatch(fetchCampRequests()),
+        fetchBloodRequests: () => dispatch(fetchBloodRequests()),
+        fetchPosts: () => dispatch(fetchPosts()),
+        fetchLikes: () => dispatch(fetchLikes()),
+        fetchComments: () => dispatch(fetchComments())
     };
 }
 
@@ -55,6 +67,9 @@ const NotificationsNavigator = createStackNavigator();
 const MainNavigator = createDrawerNavigator();
 const LoginNavigator = createStackNavigator();
 const MeetDeveloperNavigator = createStackNavigator();
+const SharingNavigator = createStackNavigator();
+const MyPostsNavigator = createStackNavigator();
+const DonationHistoryNavigator = createStackNavigator();
 
 function ProfileNavigatorScreen() {
 
@@ -101,6 +116,112 @@ function ProfileNavigatorScreen() {
     );
 }
 
+function DonationHistoryNavigatorScreen() {
+
+    return(
+        <DonationHistoryNavigator.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: "#fa4659"
+                },
+                headerTintColor: "#fff",
+                headerTitleStyle: {
+                    color: "#fff"            
+                }
+            }}
+        >
+            <DonationHistoryNavigator.Screen
+                name="Donation History"
+                component={DonationHistory}
+                options={{headerTitle: "Donation History"},({navigation}) => ({
+                    headerLeft: () => (
+                        <Icon 
+                            name='menu' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginLeft: 10}}
+                            onPress={() => 
+                                navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='history'
+                            type='font-awesome-5' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        />
+                    )
+                
+                })}
+            />
+        </DonationHistoryNavigator.Navigator>
+    );
+}
+
+function MyPostsNavigatorScreen() {
+
+    return(
+        <MyPostsNavigator.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: "#fa4659"
+                },
+                headerTintColor: "#fff",
+                headerTitleStyle: {
+                    color: "#fff"            
+                }
+            }}
+        >
+            <MyPostsNavigator.Screen
+                name="My Posts"
+                component={MyPosts}
+                options={{headerTitle: "My Posts"},({navigation}) => ({
+                    headerLeft: () => (
+                        <Icon 
+                            name='menu' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginLeft: 10}}
+                            onPress={() => 
+                                navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='images'
+                            type='font-awesome-5' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        />
+                    )
+                
+                })}
+            />
+            <MyPostsNavigator.Screen
+                name="User Details"
+                component={UserDetail}
+                options= {{ headerTitle: "User Details", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <MyPostsNavigator.Screen
+                name="Comments"
+                component={Comments}
+                options= {{ headerTitle: "Comments", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+        </MyPostsNavigator.Navigator>
+    );
+}
+
 function LoginNavigatorScreen() {
     return(
         <LoginNavigator.Navigator
@@ -142,6 +263,75 @@ function LoginNavigatorScreen() {
                 })}
             />
         </LoginNavigator.Navigator>
+    );
+}
+
+function SharingNavigatorScreen() {
+    return(
+        <SharingNavigator.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: "#fa4659"
+                },
+                headerTintColor: "#fff",
+                headerTitleStyle: {
+                    color: "#fff"            
+                }
+            }}
+        >
+            <SharingNavigator.Screen
+                name="Share with Network"
+                component={Sharing}
+                options={{headerTitle: "Share with Network"},({navigation}) => ({
+                    headerLeft: () => (
+                        <Icon 
+                            name='menu' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginLeft: 10}}
+                            onPress={() => 
+                                navigation.toggleDrawer()}
+                        />
+                    ),
+
+                    headerRight: () => (
+                        <Icon 
+                            name='share-alt'
+                            type='font-awesome-5' 
+                            size={24}
+                            color='white'
+                            iconStyle={{marginRight: 10}}
+                        
+                        />
+                    )
+                
+                })}
+            />
+            <SharingNavigator.Screen
+                name="Add Post"
+                component={AddPost}
+                options= {{ headerTitle: "Add Post", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <SharingNavigator.Screen
+                name="User Details"
+                component={UserDetail}
+                options= {{ headerTitle: "User Details", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+            <SharingNavigator.Screen
+                name="Comments"
+                component={Comments}
+                options= {{ headerTitle: "Comments", headerStyle: {backgroundColor: '#85cfcb'}, 
+                    headerTintColor: '#200019', 
+                    headerTitleStyle: {color: '#200019'}
+                }}
+            />
+        </SharingNavigator.Navigator>
     );
 }
 
@@ -427,7 +617,7 @@ function MeetDeveloperNavigatorScreen() {
 
                     headerRight: () => (
                         <Icon 
-                            name='handshake'
+                            name='code'
                             type='font-awesome-5'
                             size={24}
                             color='white'
@@ -512,6 +702,18 @@ function MainNavigatorScreen() {
                   )}}
             />
             <MainNavigator.Screen
+                name="Donation History"
+                component={DonationHistoryNavigatorScreen}
+                options={{headerTitle: "Donation History"},{drawerIcon: ({ tintColor }) => (
+                    <Icon
+                      name='history'
+                      type='font-awesome-5'            
+                      size={24}
+                      color={tintColor}
+                    />
+                  )}}
+            />
+            <MainNavigator.Screen
                 name="Need Donor"
                 component={NeedDonorNavigatorScreen}
                 options={{ headerTitle: "Need Donor"},{drawerIcon: ({ tintColor }) => (
@@ -548,11 +750,35 @@ function MainNavigatorScreen() {
                 )}}
             />
             <MainNavigator.Screen
+                name="Share with Network"
+                component={SharingNavigatorScreen}
+                options={{ headerTitle: "Share with Network"},{drawerIcon: ({ tintColor }) => (
+                    <Icon
+                      name='share-alt'
+                      type='font-awesome-5'            
+                      size={24}
+                      color={tintColor}
+                    />
+                  )}}
+            />
+            <MainNavigator.Screen
+                name="My Posts"
+                component={MyPostsNavigatorScreen}
+                options={{ headerTitle: "My Posts"},{drawerIcon: ({ tintColor }) => (
+                    <Icon
+                      name='images'
+                      type='font-awesome-5'            
+                      size={24}
+                      color={tintColor}
+                    />
+                  )}}
+            />
+            <MainNavigator.Screen
                 name="Meet Developer"
                 component={MeetDeveloperNavigatorScreen}
                 options={{ headerTitle: "Meet Developer"},{drawerIcon: ({ tintColor }) => (
                     <Icon
-                      name='handshake'
+                      name='code'
                       type='font-awesome-5'            
                       size={24}
                       color={tintColor}
@@ -566,10 +792,69 @@ function MainNavigatorScreen() {
 class Main extends Component {
 
 
-  componentDidMount() {
-      this.props.fetchUsers();
+  async componentDidMount() {
+
+    await this.props.fetchUsers();
+    var user = auth.currentUser;
+    if(user) {
+
+        var docId = this.props.users.users.filter(usr => usr.uid === user.uid)[0]._id;
+        this.registerForPushNotificationsAsync(docId);
+    }
+    
+
       this.props.fetchCampRequests();
+      this.props.fetchBloodRequests();
+      this.props.fetchPosts();
+      this.props.fetchLikes();
+      this.props.fetchComments();
     window.value = NetInfo.addEventListener(connectionInfo => this.handleConnectivityChange(connectionInfo))
+  }
+
+  async registerForPushNotificationsAsync(docId) {
+    let token;
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+   
+    if(token) {
+    const res = await firestore.collection('users').doc(docId).set({token}, {merge: true});
+    }
+
+    Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+    }),
+    });
+ 
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        sound:  'default',
+        showBadge: true,
+        
+      });
+    }
+ 
+    return token;
   }
 
   componentWillUnmount() {

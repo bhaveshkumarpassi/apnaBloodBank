@@ -6,9 +6,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { ConfigureStore } from './redux/configureStore';
 import { PersistGate } from 'redux-persist/es/integration/react'
 import {Loading} from './components/LoadingComponent';
-import { AppLoading } from 'expo';
-
-
 
 const {persistor, store }= ConfigureStore();
 

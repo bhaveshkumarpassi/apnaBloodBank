@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { View, Image, ImageBackground, Text, StyleSheet, Dimensions, ActivityIndicator, Switch, Alert} from 'react-native';
-import { auth, firestore, fireauth, firebasestore } from '../firebase/firebase';
+import { View, Image, ImageBackground, Text, Dimensions, ActivityIndicator, Switch} from 'react-native';
+import { auth } from '../firebase/firebase';
 import {Icon, Button, Card, Input} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import {normalize} from '../assets/fonts/DynamicFontSize';
@@ -40,6 +40,7 @@ class Profile extends Component {
             password: '',
             firstname: '',
             lastname: '',
+            age: '',
             contactnumber: '',
             locality: '',
             city: '',
@@ -69,6 +70,7 @@ class Profile extends Component {
                 password: User.password,
                 firstname: User.firstname,
                 lastname: User.lastname,
+                age: User.age,
                 contactnumber: User.contactnumber,
                 locality: User.locality,
                 city: User.city,
@@ -81,6 +83,7 @@ class Profile extends Component {
                 docId: User._id.toString(),
                 User: User
               })
+
             }
             else {
               this.setState({
@@ -188,7 +191,7 @@ class Profile extends Component {
                         <View style={{flex: 1, flexDirection: 'column', backgroundColor: 'black'}}>
                             <View style={{flex: 1}}>
                             <ScrollView>
-                                <View style={{ height: screenHeight-1115, paddingVertical: 5}}>
+                                <View style={{ height: screenHeight-1100, paddingVertical: 5}}>
                                     <Image
                                         source={{uri: this.state.imageUrl}}
                                         style={{height: '100%', width: 250, alignSelf: 'center', borderRadius: 10}}
@@ -197,7 +200,7 @@ class Profile extends Component {
                                 
                                 </View>
                                 <Card containerStyle={{ backgroundColor: '#c6f1e7', 
-                                    height: screenHeight+450, margin: 0, borderRadius: 60}}
+                                    height: screenHeight+700, margin: 0, borderRadius: 60}}
                                 >   
                                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', paddingTop: '2%', paddingBottom: '15%'}}>
                                     <View style={{width: '45%', height: 100, paddingRight: '2%'}}>
@@ -242,7 +245,7 @@ class Profile extends Component {
                                         <View style={{width: '45%', height: 100, paddingLeft: '2%'}}>
                                         <Button
                                             title="My Posts"
-                                            //onPress={}
+                                            onPress={() => this.props.navigation.navigate('My Posts')}
                                             buttonStyle={{backgroundColor: '#c3aed6', borderRadius: 28}}
                                             titleStyle={{color: "black", fontWeight: "bold", paddingHorizontal: '5%'}}
                                             raised
@@ -305,6 +308,13 @@ class Profile extends Component {
                                             value={this.state.bloodgroup}
                                             disabled
                                             label='Blood Group'
+                                            />
+                                        <Input
+                                            placeholder="Your Age"
+                                            onChangeText={(age) => this.setState({age})}
+                                            value={this.state.age}
+                                            disabled = {!this.state.editable}
+                                            label='Age'
                                             />
                                         <Input
                                             placeholder="Contact Number"
@@ -387,11 +397,11 @@ class Profile extends Component {
                                         </View>
                                         <View style={{marginTop: '10%'}}>
                                         <Button
-                                            onPress = {() => this.handleRegister(this.state)}
-                                            title=" View Donation History"
+                                            onPress = {() => this.props.navigation.navigate('Donation History')}
+                                            title="  View Donation History"
                                             icon={
                                                 <Icon
-                                                    name='tint'
+                                                    name='history'
                                                     type='font-awesome-5'            
                                                     size={24}
                                                     color= '#52057b'

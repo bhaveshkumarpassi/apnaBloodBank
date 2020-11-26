@@ -4,6 +4,10 @@ import logger from 'redux-logger';
 import {users} from './users';
 import {auth} from './auth';
 import {CampRequests} from './campRequests';
+import {BloodRequests} from './bloodRequests';
+import {posts} from './posts';
+import {likes} from './likes';
+import {comments} from './comments'
 import { persistStore, persistCombineReducers } from 'redux-persist';
 import { AsyncStorage } from 'react-native';
 
@@ -18,7 +22,11 @@ export const ConfigureStore = () => {
         persistCombineReducers(config, {
             users,
             auth,
-            CampRequests
+            CampRequests,
+            BloodRequests,
+            posts,
+            likes,
+            comments
         }),
         applyMiddleware(thunk, logger)
     );

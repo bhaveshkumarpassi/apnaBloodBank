@@ -21,6 +21,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "notification": {
+      "icon": "./assets/notificationIcon.png",
+      "color": "#f05454"
     }
   }
 }

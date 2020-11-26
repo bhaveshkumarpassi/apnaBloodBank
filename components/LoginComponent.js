@@ -1,21 +1,17 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Text, ScrollView, Alert, Switch, TouchableOpacity} from 'react-native';
-import { Input, CheckBox, Button, Icon, Card, Avatar, Tooltip } from 'react-native-elements';
+import { Input, Button, Icon, Card, Avatar, Tooltip } from 'react-native-elements';
 import {Picker} from 'native-base';
-//import * as SecureStore from 'expo-secure-store';
 import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-//import * as Asset from 'expo-asset';
-import { NavigationContainer } from '@react-navigation/native';
+import { Toast } from 'native-base';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ValidationComponent from 'react-native-form-validator';
 import {connect} from 'react-redux';
 import {addUser, fetchUsers, loginUser, logoutUser} from '../redux/ActionCreators';
 import { auth } from '../firebase/firebase';
 import {normalize} from '../assets/fonts/DynamicFontSize';
-
-//import { baseUrl } from '../shared/baseUrl';
 
 
 const mapStateToProps = (state) => {
@@ -157,6 +153,7 @@ class RegisterTab extends ValidationComponent {
             firstname: '',
             lastname: '',
             bloodgroup: 'O+',
+            age: '',
             contactnumber: '',
             locality: '',
             city: '',
@@ -228,6 +225,7 @@ class RegisterTab extends ValidationComponent {
             firstname: {required: true},
             lastname: {required: true},
             bloodgroup: {required: true},
+            age: {required: true, numbers: true},
             contactnumber: {required: true, numbers: true, minlength:10, maxlength: 10},
             locality: {required: true},
             city: {required: true},
@@ -239,34 +237,38 @@ class RegisterTab extends ValidationComponent {
         if(this.isFormValid()) {
             
             auth.createUserWithEmailAndPassword(creds.email, creds.password)
-            .then(() => {
+            .then(async () => {
                 var user = auth.currentUser;
-                this.props.addUser(user, creds);
+                await this.props.addUser(user, creds);
+                //await this.props.fetchUsers();
                 Alert.alert(
                     'Registration Successful!!',
-                    'Now you can head over to Home Screen.'
+                    'Now you can head over to Home Screen. Kindly Restart the application.' 
                 );
-                this.props.navigation.navigate('Home');
+
+                this.setState({
+                    gender: 'Female',
+                    email: '',
+                    password: '',
+                    firstname: '',
+                    lastname: '',
+                    bloodgroup: 'O+',
+                    age: '',
+                    contactnumber: '',
+                    locality: '',
+                    city: '',
+                    state: '',
+                    country: '',
+                    willing: true,
+                    disease: '',
+                    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119',
+                    blob: null
+                    });
+                    
+                    this.props.navigation.navigate('Home');
             })
             .catch((error) => Alert.alert('Registeration Unsucessful!!', error.message));
 
-            this.setState({
-            gender: 'Female',
-            email: '',
-            password: '',
-            firstname: '',
-            lastname: '',
-            bloodgroup: 'O+',
-            contactnumber: '',
-            locality: '',
-            city: '',
-            state: '',
-            country: '',
-            willing: true,
-            disease: '',
-            imageUrl: 'https://firebasestorage.googleapis.com/v0/b/apnabloodbankserver.appspot.com/o/uiImages%2Favatar1.png?alt=media&token=e1666ac9-8141-465c-b886-5eaf48b00119',
-            blob: null
-            })
         }
         else 
             Alert.alert(null,this.getErrorMessages());
@@ -354,6 +356,7 @@ class RegisterTab extends ValidationComponent {
                 </View>
                 <Input
                     placeholder="Email"
+                    label=' Email address: '
                     leftIcon={{ type: 'font-awesome', name: 'user' }}
                     onChangeText={(email) => this.setState({email})}
                     value={this.state.email}
@@ -361,6 +364,7 @@ class RegisterTab extends ValidationComponent {
                     />
                 <Input
                     placeholder="Set a Password"
+                    label=' Password: '
                     leftIcon={{ type: 'font-awesome', name: 'key' }}
                     onChangeText={(password) => this.setState({password})}
                     value={this.state.password}
@@ -369,6 +373,7 @@ class RegisterTab extends ValidationComponent {
                     />
                 <Input
                     placeholder="First Name"
+                    label=' First Name: '
                     leftIcon={{ type: 'font-awesome', name: 'user' }}
                     onChangeText={(firstname) => this.setState({firstname})}
                     value={this.state.firstname}
@@ -376,6 +381,7 @@ class RegisterTab extends ValidationComponent {
                     />
                 <Input
                     placeholder="Last Name"
+                    label=' Last Name: '
                     leftIcon={{ type: 'font-awesome', name: 'user' }}
                     onChangeText={(lastname) => this.setState({lastname})}
                     value={this.state.lastname}
@@ -405,35 +411,50 @@ class RegisterTab extends ValidationComponent {
                     <Picker.Item label="AB-" value="AB-" />
                 </Picker>
                 <Input
+                    placeholder="Your Age"
+                    label=' Age: '
+                    onChangeText={(age) => this.setState({age})}
+                    value={this.state.age}
+                    inputContainerStyle={styles.formInput}
+                    />
+                <Input
                     placeholder="Contact Number"
+                    label=' Contact Number: '
                     leftIcon={{ type: 'font-awesome', name: 'phone-square' }}
                     onChangeText={(contactnumber) => this.setState({contactnumber})}
                     value={this.state.contactnumber}
                     inputContainerStyle={styles.formInput}
                     />
                 <Input
-                    placeholder="resedential locality"
+                    placeholder="Provide specific address (Building,locality,sector,ward)"
+                    label=' Locality: '
                     leftIcon={{ type: 'font-awesome-5', name: 'address-card' }}
                     onChangeText={(locality) => this.setState({locality})}
                     value={this.state.locality}
                     inputContainerStyle={styles.formInput}
+                    multiline
+                    onTouchStart={() => Toast.show ({text: 'Preferably mention address where you spend most of your time. like, resendential/work-place, etc.', duration: 6000,textStyle: {textAlign: 'center'},
+                    buttonStyle: {marginBottom: 40}})}
                     />
                 <Input
-                    placeholder="resedential city"
+                    placeholder=" city"
+                    label=' City: '
                     leftIcon={{ type: 'font-awesome-5', name: 'address-card' }}
                     onChangeText={(city) => this.setState({city})}
                     value={this.state.city}
                     inputContainerStyle={styles.formInput}
                     />
                 <Input
-                    placeholder="resedential state"
+                    placeholder="Resedential state"
+                    label=' Resedential State: '
                     leftIcon={{ type: 'font-awesome-5', name: 'address-card' }}
                     onChangeText={(state) => this.setState({state})}
                     value={this.state.state}
                     inputContainerStyle={styles.formInput}
                     />
                 <Input
-                    placeholder="resedential country"
+                    placeholder="Resedential country"
+                    label=' Resedential Country: '
                     leftIcon={{ type: 'font-awesome-5', name: 'address-card' }}
                     onChangeText={(country) => this.setState({country})}
                     value={this.state.country}
@@ -442,6 +463,7 @@ class RegisterTab extends ValidationComponent {
                     />
                 <Input 
                     placeholder="Medical details"
+                    label=' Medical Details: '
                     multiline={true}
                     onTouchStart={() => this.onDiseaseSelect()}
                     onChangeText={(disease) => this.setState({disease})}
