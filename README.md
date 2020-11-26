@@ -3,7 +3,7 @@
 ### This is a cross-platform Mobile application (for both android and ios) made with React-Native and Firebase. 
 #### Key features
 * Flux architecture along with Redux is used to design the application.
-* Frontend is made with React-Native and reactjs along with some other UI frameworks.
+* Frontend is made with React-Native and reactjs along with some other UI framework librarires.
 * Used user authentication with e-mail and password provided by firebase.
 * Used Cloud firestore from firebase as Database for the application.
 * Used both push and local notifications services provided by expo and FCM.
