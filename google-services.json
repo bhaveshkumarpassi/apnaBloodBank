@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "914304280006",
+    "firebase_url": "https://apnabloodbankserver.firebaseio.com",
+    "project_id": "apnabloodbankserver",
+    "storage_bucket": "apnabloodbankserver.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914304280006:android:53781dadbf99166b0b7ec7",
+        "android_client_info": {
+          "package_name": "com.apnaBloodBankNetwork.apnaBloodBank"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "914304280006-m3g8oap7b297nq100beo16pd4l0j3g21.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBvEQ3OqR0gymoNGPShCKIjPglDABO4A0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "914304280006-m3g8oap7b297nq100beo16pd4l0j3g21.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

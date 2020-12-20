@@ -4,7 +4,7 @@
     "slug": "apnaBloodBank",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/bloodLogo.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -17,7 +17,19 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.apnaBloodBankNetwork.apnaBloodBank",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.apnaBloodBankNetwork.apnaBloodBank",
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBP-I3LAnVKy4FUVFTo3N8SjoP8zHMHxb0"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
