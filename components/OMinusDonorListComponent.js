@@ -97,7 +97,7 @@ class OMinusDonorList extends Component {
 
             return(
                 <View>            
-                    <Text>{props.dishes.errMess}</Text>
+                    <Text>{this.props.props.errMess}</Text>
                 </View>            
             );
         }

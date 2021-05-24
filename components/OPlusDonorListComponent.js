@@ -97,7 +97,7 @@ class OPlusDonorList extends Component {
 
             return(
                 <View>            
-                    <Text>{props.dishes.errMess}</Text>
+                    <Text>{this.props.users.errMess}</Text>
                 </View>            
             );
         }
